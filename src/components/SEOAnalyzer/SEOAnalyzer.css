@@ -1,0 +1,153 @@
+.seo-analyzer {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky;
+    top: calc(var(--nav-height) + 20px);
+}
+
+.seo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+/* Score Circle */
+.seo-score-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 24px;
+}
+
+.seo-score-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.score-bg {
+    fill: none;
+    stroke: var(--border-color);
+    stroke-width: 8;
+}
+
+.score-progress {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease, stroke 0.3s ease;
+}
+
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Metrics List */
+.seo-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.seo-metric {
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.seo-metric.good {
+    border-left-color: #22c55e;
+}
+
+.seo-metric.okay {
+    border-left-color: #eab308;
+}
+
+.seo-metric.bad {
+    border-left-color: #ef4444;
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.metric-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 6px;
+    color: var(--accent-color);
+}
+
+.metric-name {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.metric-status {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.metric-status.good {
+    color: #22c55e;
+}
+
+.metric-status.okay {
+    color: #eab308;
+}
+
+.metric-status.bad {
+    color: #ef4444;
+}
+
+.metric-message {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    padding-left: 32px;
+}
+
+/* Mobile */
+@media (max-width: 1024px) {
+    .seo-analyzer {
+        position: static;
+        margin-top: 24px;
+    }
+}

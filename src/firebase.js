@@ -13,6 +13,7 @@ import {
     orderBy,
     serverTimestamp
 } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,6 +29,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // ==========================================
 // ADMIN AUTHENTICATION (Simple Password)

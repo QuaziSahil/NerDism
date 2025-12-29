@@ -1,13 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-    Save, Eye, Layout, Image as ImageIcon, Bold, Italic,
-    Heading1, Heading2, Code, List, Link as LinkIcon, Quote,
-    LogOut, Check, AlertCircle, Loader
+    Save, Eye, Layout, Bold, Italic, Heading1, Heading2, Heading3,
+    Code, List, Link as LinkIcon, Quote, LogOut, Check, AlertCircle,
+    Loader, Undo, Redo, Smile, Table, Clock, FileText, Hash
 } from 'lucide-react';
 import { createPost, setAdminAuthenticated } from '../../firebase';
+import SEOAnalyzer from '../../components/SEOAnalyzer/SEOAnalyzer';
+import ImageUploader from '../../components/ImageUploader/ImageUploader';
 import './Editor.css';
+
+// Common emojis for quick access
+const EMOJIS = ['🔥', '✨', '🚀', '💡', '🎮', '🎬', '🤖', '💻', '📱', '⚡', '🎯', '👀', '💪', '🎉', '❤️', '👍'];
 
 const Editor = () => {
     const navigate = useNavigate();
@@ -16,23 +21,83 @@ const Editor = () => {
         excerpt: '',
         content: '',
         category: 'Tech',
-        image: ''
+        image: '',
+        focusKeyword: ''
     });
 
     const [isPreview, setIsPreview] = useState(false);
-    const [saveStatus, setSaveStatus] = useState('idle'); // idle, saving, success, error
+    const [saveStatus, setSaveStatus] = useState('idle');
     const [saveMessage, setSaveMessage] = useState('');
+    const [showEmojis, setShowEmojis] = useState(false);
+    const [history, setHistory] = useState([]);
+    const [historyIndex, setHistoryIndex] = useState(-1);
+    const [lastSaved, setLastSaved] = useState(null);
     const contentRef = useRef(null);
 
-    // Updated categories including Anime, Movies, AI
     const categories = ['Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
+
+    // Calculate stats
+    const words = post.content.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const characters = post.content.length;
+    const readingTime = Math.max(1, Math.ceil(words / 200));
+
+    // Auto-save to localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('nerdism_draft');
+        if (saved) {
+            try {
+                const draft = JSON.parse(saved);
+                setPost(draft);
+                setLastSaved(new Date(draft.savedAt));
+            } catch (e) { }
+        }
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (post.title || post.content) {
+                localStorage.setItem('nerdism_draft', JSON.stringify({
+                    ...post,
+                    savedAt: new Date().toISOString()
+                }));
+                setLastSaved(new Date());
+            }
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [post]);
+
+    // History for undo/redo
+    const saveToHistory = useCallback((content) => {
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(content);
+        if (newHistory.length > 50) newHistory.shift();
+        setHistory(newHistory);
+        setHistoryIndex(newHistory.length - 1);
+    }, [history, historyIndex]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setPost(prev => ({ ...prev, [name]: value }));
+        if (name === 'content') {
+            saveToHistory(value);
+        }
     };
 
-    // Formatting toolbar functions
+    const undo = () => {
+        if (historyIndex > 0) {
+            setHistoryIndex(historyIndex - 1);
+            setPost(prev => ({ ...prev, content: history[historyIndex - 1] }));
+        }
+    };
+
+    const redo = () => {
+        if (historyIndex < history.length - 1) {
+            setHistoryIndex(historyIndex + 1);
+            setPost(prev => ({ ...prev, content: history[historyIndex + 1] }));
+        }
+    };
+
+    // Formatting functions
     const insertFormat = (before, after = '') => {
         const textarea = contentRef.current;
         if (!textarea) return;
@@ -43,6 +108,7 @@ const Editor = () => {
         const newText = post.content.substring(0, start) + before + selectedText + after + post.content.substring(end);
 
         setPost(prev => ({ ...prev, content: newText }));
+        saveToHistory(newText);
 
         setTimeout(() => {
             textarea.focus();
@@ -50,15 +116,25 @@ const Editor = () => {
         }, 0);
     };
 
-    const formatBold = () => insertFormat('**', '**');
-    const formatItalic = () => insertFormat('*', '*');
-    const formatH1 = () => insertFormat('# ');
-    const formatH2 = () => insertFormat('## ');
-    const formatCode = () => insertFormat('`', '`');
-    const formatCodeBlock = () => insertFormat('```\n', '\n```');
-    const formatList = () => insertFormat('- ');
-    const formatQuote = () => insertFormat('> ');
-    const formatLink = () => insertFormat('[', '](url)');
+    const insertEmoji = (emoji) => {
+        const textarea = contentRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const newText = post.content.substring(0, start) + emoji + post.content.substring(start);
+        setPost(prev => ({ ...prev, content: newText }));
+        setShowEmojis(false);
+
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+        }, 0);
+    };
+
+    const insertTable = () => {
+        const tableMarkdown = '\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n';
+        insertFormat(tableMarkdown);
+    };
 
     const handlePublish = async () => {
         if (!post.title.trim() || !post.content.trim()) {
@@ -75,10 +151,10 @@ const Editor = () => {
         if (result.success) {
             setSaveStatus('success');
             setSaveMessage(`Published! View at /blog/${result.slug}`);
+            localStorage.removeItem('nerdism_draft');
 
-            // Reset form after 2 seconds
             setTimeout(() => {
-                setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '' });
+                setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
                 setSaveStatus('idle');
                 setSaveMessage('');
             }, 3000);
@@ -93,7 +169,12 @@ const Editor = () => {
         navigate('/admin');
     };
 
-    // Simple markdown to HTML converter for preview
+    const clearDraft = () => {
+        localStorage.removeItem('nerdism_draft');
+        setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
+        setLastSaved(null);
+    };
+
     const renderMarkdown = (text) => {
         if (!text) return '';
         return text
@@ -109,19 +190,26 @@ const Editor = () => {
     };
 
     return (
-        <div className="editor-page">
-            <div className="editor-header">
-                <h1>New <span className="gradient-text">Post</span></h1>
+        <div className="editor-page-enhanced">
+            {/* Header */}
+            <div className="editor-top-bar">
+                <div className="editor-branding">
+                    <h1>New <span className="gradient-text">Post</span></h1>
+                    {lastSaved && (
+                        <span className="auto-saved">
+                            <Check size={12} /> Auto-saved {lastSaved.toLocaleTimeString()}
+                        </span>
+                    )}
+                </div>
                 <div className="editor-actions">
                     <button className="action-btn logout-btn" onClick={handleLogout}>
                         <LogOut size={18} />
-                        Logout
                     </button>
                     <button
                         className={`action-btn ${isPreview ? 'active' : ''}`}
                         onClick={() => setIsPreview(!isPreview)}
                     >
-                        {isPreview ? <Layout size={20} /> : <Eye size={20} />}
+                        {isPreview ? <Layout size={18} /> : <Eye size={18} />}
                         {isPreview ? 'Edit' : 'Preview'}
                     </button>
                     <button
@@ -130,26 +218,17 @@ const Editor = () => {
                         disabled={saveStatus === 'saving'}
                     >
                         {saveStatus === 'saving' ? (
-                            <>
-                                <Loader size={20} className="spin" />
-                                Publishing...
-                            </>
+                            <><Loader size={18} className="spin" /> Publishing...</>
                         ) : saveStatus === 'success' ? (
-                            <>
-                                <Check size={20} />
-                                Published!
-                            </>
+                            <><Check size={18} /> Published!</>
                         ) : (
-                            <>
-                                <Save size={20} />
-                                Publish
-                            </>
+                            <><Save size={18} /> Publish</>
                         )}
                     </button>
                 </div>
             </div>
 
-            {/* Status Messages */}
+            {/* Status Message */}
             {saveMessage && (
                 <motion.div
                     className={`save-message ${saveStatus}`}
@@ -161,21 +240,34 @@ const Editor = () => {
                 </motion.div>
             )}
 
-            <div className="editor-container">
-                {/* Meta Fields */}
-                <div className="editor-meta">
-                    <div className="form-group">
-                        <label>Post Title</label>
+            <div className="editor-layout">
+                {/* Main Editor */}
+                <div className="editor-main-panel">
+                    {/* Title */}
+                    <div className="form-group title-group">
                         <input
                             type="text"
                             name="title"
                             value={post.title}
                             onChange={handleChange}
                             placeholder="Enter an awesome title..."
+                            className="title-input"
                         />
+                        <span className="char-hint">{post.title.length}/60</span>
                     </div>
 
-                    <div className="form-row">
+                    {/* Meta Row */}
+                    <div className="meta-row">
+                        <div className="form-group">
+                            <label><Hash size={14} /> Focus Keyword</label>
+                            <input
+                                type="text"
+                                name="focusKeyword"
+                                value={post.focusKeyword}
+                                onChange={handleChange}
+                                placeholder="e.g., web animations"
+                            />
+                        </div>
                         <div className="form-group">
                             <label>Category</label>
                             <select name="category" value={post.category} onChange={handleChange}>
@@ -184,54 +276,75 @@ const Editor = () => {
                                 ))}
                             </select>
                         </div>
-
-                        <div className="form-group">
-                            <label>Featured Image URL</label>
-                            <div className="input-icon-wrapper">
-                                <ImageIcon size={18} />
-                                <input
-                                    type="text"
-                                    name="image"
-                                    value={post.image}
-                                    onChange={handleChange}
-                                    placeholder="https://..."
-                                />
-                            </div>
-                        </div>
                     </div>
 
+                    {/* Featured Image */}
                     <div className="form-group">
-                        <label>Excerpt (Short summary)</label>
+                        <label>Featured Image</label>
+                        <ImageUploader
+                            value={post.image}
+                            onChange={(url) => setPost(prev => ({ ...prev, image: url }))}
+                        />
+                    </div>
+
+                    {/* Excerpt */}
+                    <div className="form-group">
+                        <label>
+                            <FileText size={14} /> Meta Description (Excerpt)
+                            <span className="char-hint">{post.excerpt.length}/160</span>
+                        </label>
                         <textarea
                             name="excerpt"
                             value={post.excerpt}
                             onChange={handleChange}
-                            rows={3}
-                            placeholder="What is this post about? (Optional - auto-generated if empty)"
+                            rows={2}
+                            placeholder="Short summary for search results..."
                         />
                     </div>
-                </div>
 
-                {/* Content Editor / Preview */}
-                <div className="editor-main">
                     {/* Formatting Toolbar */}
                     {!isPreview && (
                         <div className="formatting-toolbar">
-                            <button onClick={formatBold} title="Bold"><Bold size={18} /></button>
-                            <button onClick={formatItalic} title="Italic"><Italic size={18} /></button>
+                            <div className="toolbar-group">
+                                <button onClick={() => insertFormat('**', '**')} title="Bold"><Bold size={16} /></button>
+                                <button onClick={() => insertFormat('*', '*')} title="Italic"><Italic size={16} /></button>
+                            </div>
                             <div className="toolbar-divider" />
-                            <button onClick={formatH1} title="Heading 1"><Heading1 size={18} /></button>
-                            <button onClick={formatH2} title="Heading 2"><Heading2 size={18} /></button>
+                            <div className="toolbar-group">
+                                <button onClick={() => insertFormat('# ')} title="H1"><Heading1 size={16} /></button>
+                                <button onClick={() => insertFormat('## ')} title="H2"><Heading2 size={16} /></button>
+                                <button onClick={() => insertFormat('### ')} title="H3"><Heading3 size={16} /></button>
+                            </div>
                             <div className="toolbar-divider" />
-                            <button onClick={formatCode} title="Inline Code"><Code size={18} /></button>
-                            <button onClick={formatCodeBlock} title="Code Block">{'{ }'}</button>
+                            <div className="toolbar-group">
+                                <button onClick={() => insertFormat('`', '`')} title="Code"><Code size={16} /></button>
+                                <button onClick={() => insertFormat('- ')} title="List"><List size={16} /></button>
+                                <button onClick={() => insertFormat('> ')} title="Quote"><Quote size={16} /></button>
+                                <button onClick={() => insertFormat('[', '](url)')} title="Link"><LinkIcon size={16} /></button>
+                            </div>
                             <div className="toolbar-divider" />
-                            <button onClick={formatList} title="List"><List size={18} /></button>
-                            <button onClick={formatQuote} title="Quote"><Quote size={18} /></button>
-                            <button onClick={formatLink} title="Link"><LinkIcon size={18} /></button>
+                            <div className="toolbar-group">
+                                <button onClick={insertTable} title="Table"><Table size={16} /></button>
+                                <div className="emoji-wrapper">
+                                    <button onClick={() => setShowEmojis(!showEmojis)} title="Emoji"><Smile size={16} /></button>
+                                    {showEmojis && (
+                                        <div className="emoji-picker">
+                                            {EMOJIS.map(e => (
+                                                <button key={e} onClick={() => insertEmoji(e)}>{e}</button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="toolbar-divider" />
+                            <div className="toolbar-group">
+                                <button onClick={undo} title="Undo" disabled={historyIndex <= 0}><Undo size={16} /></button>
+                                <button onClick={redo} title="Redo" disabled={historyIndex >= history.length - 1}><Redo size={16} /></button>
+                            </div>
                         </div>
                     )}
 
+                    {/* Content Editor / Preview */}
                     {isPreview ? (
                         <div className="preview-pane">
                             <h1>{post.title}</h1>
@@ -248,11 +361,32 @@ const Editor = () => {
                                 name="content"
                                 value={post.content}
                                 onChange={handleChange}
-                                placeholder="Write your masterpiece here... Use the toolbar above or Markdown syntax!"
+                                placeholder="Write your masterpiece here... Use Markdown or the toolbar above!"
                             />
                         </div>
                     )}
+
+                    {/* Stats Bar */}
+                    <div className="stats-bar">
+                        <span><FileText size={14} /> {words} words</span>
+                        <span>{characters} characters</span>
+                        <span><Clock size={14} /> {readingTime} min read</span>
+                        {lastSaved && (
+                            <button className="clear-draft-btn" onClick={clearDraft}>Clear Draft</button>
+                        )}
+                    </div>
                 </div>
+
+                {/* SEO Sidebar */}
+                <aside className="editor-sidebar">
+                    <SEOAnalyzer
+                        title={post.title}
+                        excerpt={post.excerpt}
+                        content={post.content}
+                        focusKeyword={post.focusKeyword}
+                        hasImage={!!post.image}
+                    />
+                </aside>
             </div>
         </div>
     );
