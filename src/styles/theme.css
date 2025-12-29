@@ -1,0 +1,46 @@
+:root {
+    /* Light Mode (Default) */
+    --bg-primary: #F5F5F5;
+    --bg-secondary: #FFFFFF;
+    --text-primary: #1A1A1A;
+    --text-secondary: #666666;
+    --accent-primary: #1E3A5F;
+    --accent-secondary: #4A7AB0;
+    --border-color: #E5E5E5;
+    --card-bg: #FFFFFF;
+
+    /* Dimensions & Spacing */
+    --nav-height: 70px;
+    --max-width: 1200px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    /* Animations */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] {
+    /* Dark Mode */
+    --bg-primary: #0A0A0A;
+    --bg-secondary: #141414;
+    --text-primary: #F5F5F5;
+    --text-secondary: #A3A3A3;
+    --accent-primary: #4A7AB0;
+    /* Lighter blue for dark mode */
+    --accent-secondary: #1E3A5F;
+    --border-color: #333333;
+    --card-bg: #141414;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color var(--transition-normal), color var(--transition-normal);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
