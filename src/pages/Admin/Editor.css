@@ -168,6 +168,8 @@
 
 .editor-sidebar {
     position: relative;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 /* Form Groups */
