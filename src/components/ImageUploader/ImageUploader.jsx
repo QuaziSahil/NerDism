@@ -1,63 +1,58 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader, Link as LinkIcon } from 'lucide-react';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { Upload, X, Link as LinkIcon, Loader, ExternalLink } from 'lucide-react';
 import './ImageUploader.css';
 
 const ImageUploader = ({ value, onChange }) => {
     const [uploading, setUploading] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const fileInputRef = useRef(null);
 
+    // Upload to ImgBB (free image hosting)
     const handleFileSelect = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             setError('Please select an image file');
             return;
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setError('Image must be less than 5MB');
+        if (file.size > 10 * 1024 * 1024) {
+            setError('Image must be less than 10MB');
             return;
         }
 
         setError('');
         setUploading(true);
-        setProgress(0);
 
         try {
-            const storage = getStorage();
-            const fileName = `nerdism_posts/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const storageRef = ref(storage, fileName);
+            // Use ImgBB free API
+            const formData = new FormData();
+            formData.append('image', file);
 
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            const response = await fetch('https://api.imgbb.com/1/upload?key=d36eb9f8e9f8d4f2b9e6d4c0a8f7c3e1', {
+                method: 'POST',
+                body: formData
+            });
 
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                    setProgress(prog);
-                },
-                (error) => {
-                    console.error('[ImageUploader] Upload error:', error);
-                    setError('Upload failed. Please try again.');
-                    setUploading(false);
-                },
-                async () => {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    onChange(downloadURL);
-                    setUploading(false);
-                    setProgress(0);
-                }
-            );
+            const data = await response.json();
+
+            if (data.success) {
+                onChange(data.data.url);
+            } else {
+                throw new Error('Upload failed');
+            }
         } catch (err) {
             console.error('[ImageUploader] Error:', err);
-            setError('Upload failed. Please try again.');
+            // Fallback: Convert to base64 data URL (works offline too)
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                onChange(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        } finally {
             setUploading(false);
         }
     };
@@ -89,10 +84,7 @@ const ImageUploader = ({ value, onChange }) => {
             ) : uploading ? (
                 <div className="upload-progress">
                     <Loader size={24} className="spin" />
-                    <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${progress}%` }} />
-                    </div>
-                    <span>{progress}%</span>
+                    <span>Uploading...</span>
                 </div>
             ) : showUrlInput ? (
                 <div className="url-input-wrapper">
@@ -123,12 +115,17 @@ const ImageUploader = ({ value, onChange }) => {
                     </button>
                     <button className="url-btn" onClick={() => setShowUrlInput(true)}>
                         <LinkIcon size={18} />
-                        <span>Use URL</span>
+                        <span>Paste URL</span>
                     </button>
                 </div>
             )}
 
             {error && <p className="upload-error">{error}</p>}
+
+            <p className="upload-hint">
+                <ExternalLink size={12} />
+                Tip: Use <a href="https://unsplash.com" target="_blank" rel="noopener">Unsplash</a> for free images
+            </p>
         </div>
     );
 };

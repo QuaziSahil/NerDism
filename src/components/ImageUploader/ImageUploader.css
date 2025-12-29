@@ -146,6 +146,25 @@
     color: #ef4444;
 }
 
+/* Hint */
+.upload-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.upload-hint a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.upload-hint a:hover {
+    text-decoration: underline;
+}
+
 /* Spin Animation */
 .spin {
     animation: spin 1s linear infinite;
