@@ -1,23 +1,31 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Send, Check } from 'lucide-react';
+import { Mail, Send, Check, AlertCircle } from 'lucide-react';
+import { addNewsletterSubscriber } from '../../firebase';
 import './Newsletter.css';
 
 const Newsletter = () => {
     const [email, setEmail] = useState('');
-    const [status, setStatus] = useState('idle'); // idle, loading, success
+    const [status, setStatus] = useState('idle'); // idle, loading, success, error
+    const [message, setMessage] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email) return;
 
         setStatus('loading');
+        setMessage('');
 
-        // Simulate API call
-        setTimeout(() => {
+        // Save to Firebase
+        const result = await addNewsletterSubscriber(email);
+
+        if (result.success) {
             setStatus('success');
             setEmail('');
-        }, 1000);
+        } else {
+            setStatus('error');
+            setMessage(result.message);
+        }
     };
 
     return (
@@ -46,6 +54,12 @@ const Newsletter = () => {
                     </motion.div>
                 ) : (
                     <form className="newsletter-form" onSubmit={handleSubmit}>
+                        {status === 'error' && (
+                            <div className="error-banner">
+                                <AlertCircle size={16} />
+                                <span>{message}</span>
+                            </div>
+                        )}
                         <div className="input-group">
                             <input
                                 type="email"
@@ -53,6 +67,7 @@ const Newsletter = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
+                                disabled={status === 'loading'}
                             />
                             <button type="submit" disabled={status === 'loading'}>
                                 {status === 'loading' ? (
