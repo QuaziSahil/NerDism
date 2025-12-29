@@ -136,6 +136,24 @@ const Editor = () => {
         insertFormat(tableMarkdown);
     };
 
+    // Insert link with prompt
+    const insertLink = () => {
+        const url = prompt('Enter URL:');
+        if (url) {
+            const text = prompt('Enter link text:', 'Click here');
+            insertFormat(`[${text || 'Link'}](${url})`);
+        }
+    };
+
+    // Insert image with prompt
+    const insertImage = () => {
+        const url = prompt('Enter image URL (paste from Unsplash, etc.):');
+        if (url) {
+            const alt = prompt('Enter image description:', 'Image');
+            insertFormat(`\n![${alt || 'Image'}](${url})\n`);
+        }
+    };
+
     const handlePublish = async () => {
         if (!post.title.trim() || !post.content.trim()) {
             setSaveStatus('error');
@@ -320,7 +338,7 @@ const Editor = () => {
                                 <button onClick={() => insertFormat('`', '`')} title="Code"><Code size={16} /></button>
                                 <button onClick={() => insertFormat('- ')} title="List"><List size={16} /></button>
                                 <button onClick={() => insertFormat('> ')} title="Quote"><Quote size={16} /></button>
-                                <button onClick={() => insertFormat('[', '](url)')} title="Link"><LinkIcon size={16} /></button>
+                                <button onClick={insertLink} title="Link"><LinkIcon size={16} /></button>
                             </div>
                             <div className="toolbar-divider" />
                             <div className="toolbar-group">
