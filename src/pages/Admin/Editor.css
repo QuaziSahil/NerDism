@@ -122,6 +122,37 @@
     color: #ef4444;
 }
 
+/* Shortcuts Hint */
+.shortcuts-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.shortcuts-hint kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    margin: 0 2px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+/* Character Warning */
+.char-hint.warning {
+    color: #f97316 !important;
+    font-weight: 600;
+}
+
 /* Layout */
 .editor-layout {
     display: grid;

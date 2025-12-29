@@ -4,11 +4,14 @@ import { motion } from 'framer-motion';
 import {
     Save, Eye, Layout, Bold, Italic, Heading1, Heading2, Heading3,
     Code, List, Link as LinkIcon, Quote, LogOut, Check, AlertCircle,
-    Loader, Undo, Redo, Smile, Table, Clock, FileText, Hash
+    Loader, Undo, Redo, Smile, Table, Clock, FileText, Hash,
+    Monitor, Image as ImageIcon, Maximize2
 } from 'lucide-react';
 import { createPost, setAdminAuthenticated } from '../../firebase';
 import SEOAnalyzer from '../../components/SEOAnalyzer/SEOAnalyzer';
+import AIAssistant from '../../components/AIAssistant/AIAssistant';
 import ImageUploader from '../../components/ImageUploader/ImageUploader';
+import PostPreview from '../../components/PostPreview/PostPreview';
 import './Editor.css';
 
 // Common emojis for quick access
@@ -26,6 +29,7 @@ const Editor = () => {
     });
 
     const [isPreview, setIsPreview] = useState(false);
+    const [showFullPreview, setShowFullPreview] = useState(false);
     const [saveStatus, setSaveStatus] = useState('idle');
     const [saveMessage, setSaveMessage] = useState('');
     const [showEmojis, setShowEmojis] = useState(false);
@@ -65,6 +69,42 @@ const Editor = () => {
         }, 2000);
         return () => clearTimeout(timer);
     }, [post]);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (!contentRef.current || document.activeElement !== contentRef.current) return;
+
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'b':
+                        e.preventDefault();
+                        insertFormat('**', '**');
+                        break;
+                    case 'i':
+                        e.preventDefault();
+                        insertFormat('*', '*');
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        insertLink();
+                        break;
+                    case 'z':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            redo();
+                        } else {
+                            e.preventDefault();
+                            undo();
+                        }
+                        break;
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [post.content, historyIndex, history]);
 
     // History for undo/redo
     const saveToHistory = useCallback((content) => {
@@ -136,7 +176,6 @@ const Editor = () => {
         insertFormat(tableMarkdown);
     };
 
-    // Insert link with prompt
     const insertLink = () => {
         const url = prompt('Enter URL:');
         if (url) {
@@ -145,13 +184,17 @@ const Editor = () => {
         }
     };
 
-    // Insert image with prompt
     const insertImage = () => {
         const url = prompt('Enter image URL (paste from Unsplash, etc.):');
         if (url) {
             const alt = prompt('Enter image description:', 'Image');
             insertFormat(`\n![${alt || 'Image'}](${url})\n`);
         }
+    };
+
+    // AI Assistant apply function
+    const handleAIApply = (field, value) => {
+        setPost(prev => ({ ...prev, [field]: value }));
     };
 
     const handlePublish = async () => {
@@ -207,6 +250,11 @@ const Editor = () => {
             .replace(/\n/g, '<br/>');
     };
 
+    // Full Website Preview
+    if (showFullPreview) {
+        return <PostPreview post={post} onClose={() => setShowFullPreview(false)} />;
+    }
+
     return (
         <div className="editor-page-enhanced">
             {/* Header */}
@@ -220,7 +268,7 @@ const Editor = () => {
                     )}
                 </div>
                 <div className="editor-actions">
-                    <button className="action-btn logout-btn" onClick={handleLogout}>
+                    <button className="action-btn logout-btn" onClick={handleLogout} title="Logout">
                         <LogOut size={18} />
                     </button>
                     <button
@@ -229,6 +277,14 @@ const Editor = () => {
                     >
                         {isPreview ? <Layout size={18} /> : <Eye size={18} />}
                         {isPreview ? 'Edit' : 'Preview'}
+                    </button>
+                    <button
+                        className="action-btn"
+                        onClick={() => setShowFullPreview(true)}
+                        title="Full Website Preview"
+                    >
+                        <Monitor size={18} />
+                        Live
                     </button>
                     <button
                         className="action-btn primary"
@@ -258,6 +314,11 @@ const Editor = () => {
                 </motion.div>
             )}
 
+            {/* Keyboard Shortcuts Hint */}
+            <div className="shortcuts-hint">
+                <span>💡 Shortcuts: <kbd>Ctrl+B</kbd> Bold • <kbd>Ctrl+I</kbd> Italic • <kbd>Ctrl+K</kbd> Link • <kbd>Ctrl+Z</kbd> Undo</span>
+            </div>
+
             <div className="editor-layout">
                 {/* Main Editor */}
                 <div className="editor-main-panel">
@@ -271,7 +332,9 @@ const Editor = () => {
                             placeholder="Enter an awesome title..."
                             className="title-input"
                         />
-                        <span className="char-hint">{post.title.length}/60</span>
+                        <span className={`char-hint ${post.title.length > 60 ? 'warning' : ''}`}>
+                            {post.title.length}/60
+                        </span>
                     </div>
 
                     {/* Meta Row */}
@@ -309,7 +372,9 @@ const Editor = () => {
                     <div className="form-group">
                         <label>
                             <FileText size={14} /> Meta Description (Excerpt)
-                            <span className="char-hint">{post.excerpt.length}/160</span>
+                            <span className={`char-hint ${post.excerpt.length > 160 ? 'warning' : ''}`}>
+                                {post.excerpt.length}/160
+                            </span>
                         </label>
                         <textarea
                             name="excerpt"
@@ -324,8 +389,8 @@ const Editor = () => {
                     {!isPreview && (
                         <div className="formatting-toolbar">
                             <div className="toolbar-group">
-                                <button onClick={() => insertFormat('**', '**')} title="Bold"><Bold size={16} /></button>
-                                <button onClick={() => insertFormat('*', '*')} title="Italic"><Italic size={16} /></button>
+                                <button onClick={() => insertFormat('**', '**')} title="Bold (Ctrl+B)"><Bold size={16} /></button>
+                                <button onClick={() => insertFormat('*', '*')} title="Italic (Ctrl+I)"><Italic size={16} /></button>
                             </div>
                             <div className="toolbar-divider" />
                             <div className="toolbar-group">
@@ -338,7 +403,8 @@ const Editor = () => {
                                 <button onClick={() => insertFormat('`', '`')} title="Code"><Code size={16} /></button>
                                 <button onClick={() => insertFormat('- ')} title="List"><List size={16} /></button>
                                 <button onClick={() => insertFormat('> ')} title="Quote"><Quote size={16} /></button>
-                                <button onClick={insertLink} title="Link"><LinkIcon size={16} /></button>
+                                <button onClick={insertLink} title="Link (Ctrl+K)"><LinkIcon size={16} /></button>
+                                <button onClick={insertImage} title="Insert Image"><ImageIcon size={16} /></button>
                             </div>
                             <div className="toolbar-divider" />
                             <div className="toolbar-group">
@@ -356,8 +422,8 @@ const Editor = () => {
                             </div>
                             <div className="toolbar-divider" />
                             <div className="toolbar-group">
-                                <button onClick={undo} title="Undo" disabled={historyIndex <= 0}><Undo size={16} /></button>
-                                <button onClick={redo} title="Redo" disabled={historyIndex >= history.length - 1}><Redo size={16} /></button>
+                                <button onClick={undo} title="Undo (Ctrl+Z)" disabled={historyIndex <= 0}><Undo size={16} /></button>
+                                <button onClick={redo} title="Redo (Ctrl+Shift+Z)" disabled={historyIndex >= history.length - 1}><Redo size={16} /></button>
                             </div>
                         </div>
                     )}
@@ -395,7 +461,7 @@ const Editor = () => {
                     </div>
                 </div>
 
-                {/* SEO Sidebar */}
+                {/* SEO & AI Sidebar */}
                 <aside className="editor-sidebar">
                     <SEOAnalyzer
                         title={post.title}
@@ -403,6 +469,13 @@ const Editor = () => {
                         content={post.content}
                         focusKeyword={post.focusKeyword}
                         hasImage={!!post.image}
+                    />
+                    <AIAssistant
+                        title={post.title}
+                        excerpt={post.excerpt}
+                        content={post.content}
+                        focusKeyword={post.focusKeyword}
+                        onApply={handleAIApply}
                     />
                 </aside>
             </div>
