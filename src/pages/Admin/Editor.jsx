@@ -1,33 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Save, Eye, Layout, Image as ImageIcon, Bold, Italic, Heading1, Heading2, Code, List, Link as LinkIcon, Quote } from 'lucide-react';
+import {
+    Save, Eye, Layout, Image as ImageIcon, Bold, Italic,
+    Heading1, Heading2, Code, List, Link as LinkIcon, Quote,
+    LogOut, Check, AlertCircle, Loader
+} from 'lucide-react';
+import { createPost, setAdminAuthenticated } from '../../firebase';
 import './Editor.css';
 
 const Editor = () => {
+    const navigate = useNavigate();
     const [post, setPost] = useState({
         title: '',
-        slug: '',
         excerpt: '',
         content: '',
         category: 'Tech',
-        image: '',
-        author: 'The Nerd'
+        image: ''
     });
 
     const [isPreview, setIsPreview] = useState(false);
+    const [saveStatus, setSaveStatus] = useState('idle'); // idle, saving, success, error
+    const [saveMessage, setSaveMessage] = useState('');
     const contentRef = useRef(null);
 
     // Updated categories including Anime, Movies, AI
     const categories = ['Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
-
-    // Auto-generate slug from title
-    useEffect(() => {
-        const slug = post.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)+/g, '');
-        setPost(prev => ({ ...prev, slug }));
-    }, [post.title]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -46,7 +44,6 @@ const Editor = () => {
 
         setPost(prev => ({ ...prev, content: newText }));
 
-        // Restore cursor position
         setTimeout(() => {
             textarea.focus();
             textarea.setSelectionRange(start + before.length, end + before.length);
@@ -63,23 +60,37 @@ const Editor = () => {
     const formatQuote = () => insertFormat('> ');
     const formatLink = () => insertFormat('[', '](url)');
 
-    const handleSave = () => {
-        const postData = {
-            ...post,
-            id: Date.now().toString(),
-            date: new Date().toISOString().split('T')[0],
-            readTime: Math.ceil(post.content.split(' ').length / 200) + ' min'
-        };
+    const handlePublish = async () => {
+        if (!post.title.trim() || !post.content.trim()) {
+            setSaveStatus('error');
+            setSaveMessage('Title and content are required');
+            return;
+        }
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(postData, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", `${post.slug}.json`);
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        setSaveStatus('saving');
+        setSaveMessage('');
 
-        alert('Post JSON downloaded! Add this to your data/posts.json file.');
+        const result = await createPost(post);
+
+        if (result.success) {
+            setSaveStatus('success');
+            setSaveMessage(`Published! View at /blog/${result.slug}`);
+
+            // Reset form after 2 seconds
+            setTimeout(() => {
+                setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '' });
+                setSaveStatus('idle');
+                setSaveMessage('');
+            }, 3000);
+        } else {
+            setSaveStatus('error');
+            setSaveMessage(result.message);
+        }
+    };
+
+    const handleLogout = () => {
+        setAdminAuthenticated(false);
+        navigate('/admin');
     };
 
     // Simple markdown to HTML converter for preview
@@ -102,6 +113,10 @@ const Editor = () => {
             <div className="editor-header">
                 <h1>New <span className="gradient-text">Post</span></h1>
                 <div className="editor-actions">
+                    <button className="action-btn logout-btn" onClick={handleLogout}>
+                        <LogOut size={18} />
+                        Logout
+                    </button>
                     <button
                         className={`action-btn ${isPreview ? 'active' : ''}`}
                         onClick={() => setIsPreview(!isPreview)}
@@ -109,12 +124,42 @@ const Editor = () => {
                         {isPreview ? <Layout size={20} /> : <Eye size={20} />}
                         {isPreview ? 'Edit' : 'Preview'}
                     </button>
-                    <button className="action-btn primary" onClick={handleSave}>
-                        <Save size={20} />
-                        Save Post
+                    <button
+                        className="action-btn primary"
+                        onClick={handlePublish}
+                        disabled={saveStatus === 'saving'}
+                    >
+                        {saveStatus === 'saving' ? (
+                            <>
+                                <Loader size={20} className="spin" />
+                                Publishing...
+                            </>
+                        ) : saveStatus === 'success' ? (
+                            <>
+                                <Check size={20} />
+                                Published!
+                            </>
+                        ) : (
+                            <>
+                                <Save size={20} />
+                                Publish
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
+
+            {/* Status Messages */}
+            {saveMessage && (
+                <motion.div
+                    className={`save-message ${saveStatus}`}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    {saveStatus === 'error' ? <AlertCircle size={18} /> : <Check size={18} />}
+                    <span>{saveMessage}</span>
+                </motion.div>
+            )}
 
             <div className="editor-container">
                 {/* Meta Fields */}
@@ -127,17 +172,6 @@ const Editor = () => {
                             value={post.title}
                             onChange={handleChange}
                             placeholder="Enter an awesome title..."
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Slug (URL)</label>
-                        <input
-                            type="text"
-                            name="slug"
-                            value={post.slug}
-                            readOnly
-                            className="readonly-input"
                         />
                     </div>
 
@@ -173,7 +207,7 @@ const Editor = () => {
                             value={post.excerpt}
                             onChange={handleChange}
                             rows={3}
-                            placeholder="What is this post about?"
+                            placeholder="What is this post about? (Optional - auto-generated if empty)"
                         />
                     </div>
                 </div>

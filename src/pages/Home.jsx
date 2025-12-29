@@ -1,14 +1,25 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, Loader } from 'lucide-react';
 import PostCard from '../components/PostCard/PostCard';
 import Newsletter from '../components/Newsletter/Newsletter';
-import postsData from '../data/posts.json';
+import { getPublishedPosts } from '../firebase';
 import './Home.css';
 
 const Home = () => {
-    // Get latest 3 posts
-    const latestPosts = postsData.slice(0, 3);
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch posts from Firebase
+    useEffect(() => {
+        const fetchPosts = async () => {
+            const fetchedPosts = await getPublishedPosts();
+            setPosts(fetchedPosts.slice(0, 3)); // Get latest 3
+            setLoading(false);
+        };
+        fetchPosts();
+    }, []);
 
     return (
         <div className="home-page">
@@ -68,7 +79,13 @@ const Home = () => {
             </section>
 
             {/* Latest Posts Section */}
-            {latestPosts.length > 0 && (
+            {loading ? (
+                <section className="loading-section">
+                    <div className="container">
+                        <Loader size={32} className="spin" />
+                    </div>
+                </section>
+            ) : posts.length > 0 ? (
                 <section className="latest-posts-section">
                     <div className="container">
                         <motion.div
@@ -83,7 +100,7 @@ const Home = () => {
                         </motion.div>
 
                         <div className="posts-grid">
-                            {latestPosts.map((post, index) => (
+                            {posts.map((post, index) => (
                                 <PostCard key={post.id} post={post} index={index} />
                             ))}
                         </div>
@@ -102,10 +119,7 @@ const Home = () => {
                         </motion.div>
                     </div>
                 </section>
-            )}
-
-            {/* Empty State for no posts */}
-            {latestPosts.length === 0 && (
+            ) : (
                 <section className="empty-state">
                     <div className="container">
                         <h2>Coming Soon</h2>

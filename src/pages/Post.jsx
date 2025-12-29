@@ -1,18 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, User, Share2, Twitter, Facebook, Linkedin, ArrowLeft } from 'lucide-react';
-import postsData from '../data/posts.json';
+import { Calendar, Clock, User, Share2, Twitter, Facebook, Linkedin, ArrowLeft, Loader } from 'lucide-react';
+import { getPostBySlug, getPublishedPosts } from '../firebase';
 import SEO from '../components/SEO/SEO';
-import AdSlot from '../components/AdSlot/AdSlot';
 import './Post.css';
 
 const Post = () => {
     const { slug } = useParams();
-    const post = postsData.find(p => p.slug === slug);
+    const [post, setPost] = useState(null);
+    const [relatedPosts, setRelatedPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [readProgress, setReadProgress] = useState(0);
 
+    // Fetch post from Firebase
     useEffect(() => {
+        const fetchPost = async () => {
+            setLoading(true);
+            const fetchedPost = await getPostBySlug(slug);
+            setPost(fetchedPost);
+
+            // Fetch related posts
+            if (fetchedPost) {
+                const allPosts = await getPublishedPosts();
+                const related = allPosts
+                    .filter(p => p.category === fetchedPost.category && p.id !== fetchedPost.id)
+                    .slice(0, 3);
+                setRelatedPosts(related);
+            }
+
+            setLoading(false);
+        };
+        fetchPost();
         window.scrollTo(0, 0);
     }, [slug]);
 
@@ -28,6 +47,17 @@ const Post = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Loading state
+    if (loading) {
+        return (
+            <div className="container post-loading">
+                <Loader size={32} className="spin" />
+                <p>Loading post...</p>
+            </div>
+        );
+    }
+
+    // Not found
     if (!post) {
         return (
             <div className="container post-not-found">
@@ -41,10 +71,30 @@ const Post = () => {
         );
     }
 
-    // Get related posts (same category, excluding current)
-    const relatedPosts = postsData
-        .filter(p => p.category === post.category && p.id !== post.id)
-        .slice(0, 3);
+    // Render markdown content
+    const renderContent = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+            .replace(/^- (.*$)/gim, '<li>$1</li>')
+            .replace(/\n/g, '<br/>');
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
 
     return (
         <article className="post-page">
@@ -91,11 +141,11 @@ const Post = () => {
                     >
                         <div className="meta-group">
                             <User size={18} />
-                            <span>{post.author}</span>
+                            <span>{post.author?.name || 'Sahil'}</span>
                         </div>
                         <div className="meta-group">
                             <Calendar size={18} />
-                            <span>{new Date(post.date).toLocaleDateString()}</span>
+                            <span>{formatDate(post.publishedAt)}</span>
                         </div>
                         <div className="meta-group">
                             <Clock size={18} />
@@ -104,17 +154,19 @@ const Post = () => {
                     </motion.div>
                 </div>
 
-                <div className="hero-image-wrapper">
-                    <motion.img
-                        src={post.image}
-                        alt={post.title}
-                        className="hero-image"
-                        initial={{ scale: 1.1, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.8 }}
-                    />
-                    <div className="overlay"></div>
-                </div>
+                {post.image && (
+                    <div className="hero-image-wrapper">
+                        <motion.img
+                            src={post.image}
+                            alt={post.title}
+                            className="hero-image"
+                            initial={{ scale: 1.1, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.8 }}
+                        />
+                        <div className="overlay"></div>
+                    </div>
+                )}
             </div>
 
             {/* Post Content */}
@@ -136,55 +188,33 @@ const Post = () => {
                                 <Share2 size={20} />
                             </button>
                         </div>
-                        <AdSlot slotId="SIDEBAR_SLOT_ID" className="ad-sidebar" />
                     </div>
                 </aside>
 
                 {/* Main Content */}
                 <div className="post-content-body">
-                    <p className="lead-paragraph">{post.excerpt}</p>
+                    {post.excerpt && <p className="lead-paragraph">{post.excerpt}</p>}
 
-                    <AdSlot slotId="CONTENT_TOP_ID" />
-
-                    {/* Mock Content Structure */}
-                    <h2>The Beginning of Something Great</h2>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    </p>
-                    <p>
-                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    </p>
-
-                    <blockquote>
-                        "Clean code always looks like it was written by someone who cares."
-                    </blockquote>
-
-                    <h3>Why This Matters</h3>
-                    <p>
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
-                        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-                    </p>
-
-                    <div className="post-tags">
-                        <span className="tag">#WebDev</span>
-                        <span className="tag">#Design</span>
-                        <span className="tag">#NerDism</span>
-                    </div>
+                    {/* Render actual content */}
+                    <div
+                        className="post-content-rendered"
+                        dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
+                    />
 
                     {/* Author Box */}
                     <div className="author-box">
                         <div className="author-avatar">
-                            <User size={32} />
+                            {post.author?.avatar ? (
+                                <img src={post.author.avatar} alt={post.author.name} />
+                            ) : (
+                                <User size={32} />
+                            )}
                         </div>
                         <div className="author-info">
-                            <h4>Written by {post.author}</h4>
+                            <h4>Written by {post.author?.name || 'Sahil'}</h4>
                             <p>Technologist, gamer, and professional nerd. Exploring the intersection of code and culture.</p>
                         </div>
                     </div>
-
-                    <AdSlot slotId="CONTENT_BOTTOM_ID" />
 
                     {/* Related Posts */}
                     {relatedPosts.length > 0 && (

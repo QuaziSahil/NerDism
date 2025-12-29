@@ -1,8 +1,56 @@
 .editor-page {
     padding-top: calc(var(--nav-height) + 40px);
-    padding-bottom: 40px;
-    background: var(--bg-secondary);
+    padding-bottom: 60px;
     min-height: 100vh;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Save Message */
+.save-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.save-message.success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.save-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+/* Spin animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Logout button */
+.logout-btn {
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.logout-btn:hover {
+    color: #ef4444 !important;
+    border-color: #ef4444 !important;
 }
 
 .editor-header {

@@ -199,18 +199,35 @@
 
 /* Empty State */
 .empty-state {
-    padding: 100px 0;
     text-align: center;
+    padding: 100px 20px;
 }
 
 .empty-state h2 {
     font-size: 2rem;
     margin-bottom: 12px;
-    color: var(--text-secondary);
 }
 
 .empty-state p {
     color: var(--text-secondary);
+}
+
+/* Loading Section */
+.loading-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 20px;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Mobile Adjustments */

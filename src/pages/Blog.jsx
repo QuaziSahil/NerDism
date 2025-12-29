@@ -1,22 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, Loader } from 'lucide-react';
 import PostCard from '../components/PostCard/PostCard';
-import postsData from '../data/posts.json';
+import { getPublishedPosts } from '../firebase';
 import './Blog.css';
 
 const Blog = () => {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Fetch posts from Firebase
+    useEffect(() => {
+        const fetchPosts = async () => {
+            setLoading(true);
+            const fetchedPosts = await getPublishedPosts();
+            setPosts(fetchedPosts);
+            setLoading(false);
+        };
+        fetchPosts();
+    }, []);
 
     // Updated categories including Anime, Movies, AI
     const categories = ['All', 'Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
 
     // Filter by category and search
-    const filteredPosts = postsData.filter(post => {
+    const filteredPosts = posts.filter(post => {
         const matchesCategory = filter === 'All' || post.category === filter;
         const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+            (post.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -68,15 +81,25 @@ const Blog = () => {
                     ))}
                 </motion.div>
 
+                {/* Loading State */}
+                {loading && (
+                    <div className="loading-state">
+                        <Loader size={32} className="spin" />
+                        <p>Loading posts...</p>
+                    </div>
+                )}
+
                 {/* Posts Grid */}
-                <div className="posts-grid">
-                    {filteredPosts.map((post, index) => (
-                        <PostCard key={post.id} post={post} index={index} />
-                    ))}
-                </div>
+                {!loading && (
+                    <div className="posts-grid">
+                        {filteredPosts.map((post, index) => (
+                            <PostCard key={post.id} post={post} index={index} />
+                        ))}
+                    </div>
+                )}
 
                 {/* No Results */}
-                {filteredPosts.length === 0 && (
+                {!loading && filteredPosts.length === 0 && (
                     <motion.div
                         className="no-posts"
                         initial={{ opacity: 0 }}

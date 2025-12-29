@@ -100,13 +100,35 @@
 /* No Posts */
 .no-posts {
     text-align: center;
-    padding: 80px 20px;
+    padding: 60px 20px;
+    color: var(--text-secondary);
 }
 
 .no-posts h3 {
     font-size: 1.5rem;
     margin-bottom: 8px;
     color: var(--text-primary);
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 16px;
+    color: var(--text-secondary);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .no-posts p {

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
@@ -6,7 +6,17 @@ import Post from './pages/Post';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Categories from './pages/Categories';
+import Login from './pages/Admin/Login';
 import Editor from './pages/Admin/Editor';
+import { isAdminAuthenticated } from './firebase';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  if (!isAdminAuthenticated()) {
+    return <Navigate to="/admin" replace />;
+  }
+  return children;
+};
 
 function App() {
   return (
@@ -21,7 +31,18 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/categories" element={<Categories />} />
-            <Route path="/editor" element={<Editor />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Login />} />
+            <Route
+              path="/editor"
+              element={
+                <ProtectedRoute>
+                  <Editor />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Fallback */}
             <Route path="*" element={<Home />} />
           </Routes>
