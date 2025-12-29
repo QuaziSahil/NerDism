@@ -167,7 +167,10 @@
 }
 
 .editor-sidebar {
-    position: relative;
+    position: sticky;
+    top: calc(var(--nav-height) + 20px);
+    max-height: calc(100vh - var(--nav-height) - 40px);
+    overflow-y: auto;
     z-index: 10;
     pointer-events: auto;
 }

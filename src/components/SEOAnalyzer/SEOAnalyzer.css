@@ -3,10 +3,6 @@
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
-    position: sticky;
-    top: calc(var(--nav-height) + 20px);
-    z-index: 10;
-    pointer-events: auto;
 }
 
 .seo-header {
