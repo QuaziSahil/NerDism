@@ -1,14 +1,15 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import {
     Sparkles, Wand2, FileText, Heading, ListChecks,
     RefreshCw, Copy, Check, X, Loader, ChevronDown, ChevronUp,
-    Send, Bot, MessageSquare
+    Send, Bot, Maximize2, Minimize2, ArrowRight
 } from 'lucide-react';
 import './AIAssistant.css';
 
-// Google Gemini API - Key loaded from Vercel environment variable (NEVER hardcode!)
+// Google Gemini API - Key loaded from Vercel environment variable
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
 
 const callGeminiAPI = async (prompt) => {
     if (!GEMINI_API_KEY || GEMINI_API_KEY === 'undefined') {
@@ -26,25 +27,42 @@ const callGeminiAPI = async (prompt) => {
                 }],
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 1024,
+                    maxOutputTokens: 2048,
                 }
             })
         });
 
         const data = await response.json();
 
+        if (!response.ok) {
+            console.error('[Gemini API] Error Response:', data);
+            throw new Error(data.error?.message || response.statusText);
+        }
+
         if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
             return data.candidates[0].content.parts[0].text;
         }
-        throw new Error('Invalid response');
+
+        console.error('[Gemini API] Unexpected Response Structure:', data);
+        throw new Error('Invalid response structure from AI');
     } catch (error) {
-        console.error('[Gemini API] Error:', error);
+        console.error('[Gemini API] Request Failed:', error);
         throw error;
     }
 };
 
+const QUICK_ACTIONS = [
+    { label: 'Simplify', prompt: 'Rewrite the above text to be simpler and easier to understand.' },
+    { label: 'Expand', prompt: 'Expand on the above text with more details and examples.' },
+    { label: 'Shorten', prompt: 'Summarize the above text concisely.' },
+    { label: 'Fix Grammar', prompt: 'Correct any grammar and spelling errors in the above text.' },
+    { label: 'Tone: Pro', prompt: 'Rewrite the above text in a professional tone.' },
+    { label: 'Tone: Fun', prompt: 'Rewrite the above text in a fun and engaging tone.' },
+];
+
 const AIAssistant = ({ title, excerpt, content, focusKeyword, onApply }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const [isFullScreen, setIsFullScreen] = useState(false);
     const [loading, setLoading] = useState(null);
     const [suggestion, setSuggestion] = useState(null);
     const [copied, setCopied] = useState(false);
@@ -52,6 +70,13 @@ const AIAssistant = ({ title, excerpt, content, focusKeyword, onApply }) => {
     const [chatMessages, setChatMessages] = useState([]);
     const [chatLoading, setChatLoading] = useState(false);
     const chatRef = useRef(null);
+
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
+    }, [chatMessages, isFullScreen]);
 
     const generateSuggestion = async (type) => {
         setLoading(type);
@@ -106,8 +131,7 @@ const AIAssistant = ({ title, excerpt, content, focusKeyword, onApply }) => {
                     - Include a call to action
                     - Be engaging and informative
                     - Include the focus keyword naturally
-                    
-                    Just provide the meta description text, nothing else.`;
+                    - Return ONLY the description text`;
 
                     const excerptResult = await callGeminiAPI(prompt);
                     result = {
@@ -156,58 +180,52 @@ const AIAssistant = ({ title, excerpt, content, focusKeyword, onApply }) => {
             }
 
             setSuggestion(result);
+            if (!isFullScreen) setIsExpanded(true);
         } catch (error) {
             setSuggestion({
                 type: 'error',
-                title: '❌ Configuration Error',
+                title: '❌ Error',
                 content: error.message === 'API_KEY_MISSING'
-                    ? 'Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel Environment Variables and Redeploy.'
-                    : 'Failed to generate content. This might be due to a blocked or invalid API key.'
+                    ? 'Gemini API Key is missing. Check your Vercel settings.'
+                    : 'Failed to generate content. Please try again.'
             });
         }
 
         setLoading(null);
     };
 
-    // Chat with AI
-    const handleChatSubmit = async (e) => {
-        e.preventDefault();
-        if (!chatInput.trim() || chatLoading) return;
+    const handleChatSubmit = async (e, customPrompt = null) => {
+        if (e) e.preventDefault();
+        const messageText = customPrompt || chatInput.trim();
 
-        const userMessage = chatInput.trim();
+        if (!messageText || chatLoading) return;
+
         setChatInput('');
-        setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        setChatMessages(prev => [...prev, { role: 'user', content: customPrompt ? customPrompt : messageText }]);
         setChatLoading(true);
 
         try {
-            const context = `You are an AI writing assistant for a blog editor. The user is writing a blog post.
+            const context = `You are an AI writing assistant for a blog editor. 
             
-Current post details:
+Current Post Context:
 - Title: ${title || 'Not set'}
-- Focus Keyword: ${focusKeyword || 'Not set'}
+- Keyword: ${focusKeyword || 'Not set'}
 - Excerpt: ${excerpt || 'Not set'}
-- Content length: ${content?.length || 0} characters
+- Content Length: ${content?.length || 0} chars
 
-The user's request: ${userMessage}
+User Request: ${messageText}
 
-Respond helpfully and concisely. If they ask you to write content, format it in Markdown.
-If they ask for improvements or changes, provide the updated text directly.`;
+Response Guidelines:
+- Be helpful, concise, and professional.
+- Use Markdown for formatting (headings, lists, bold).
+- If writing content, aim for high quality and engagement.`;
 
             const response = await callGeminiAPI(context);
             setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
-
-            // Scroll to bottom
-            setTimeout(() => {
-                if (chatRef.current) {
-                    chatRef.current.scrollTop = chatRef.current.scrollHeight;
-                }
-            }, 100);
         } catch (error) {
             setChatMessages(prev => [...prev, {
                 role: 'assistant',
-                content: error.message === 'API_KEY_MISSING'
-                    ? '⚠️ Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel Environment Variables.'
-                    : 'Sorry, I encountered an error. This usually happens if the API key is invalid or rate limited.'
+                content: '⚠️ Error: ' + (error.message || 'Something went wrong.')
             }]);
         }
 
@@ -216,7 +234,7 @@ If they ask for improvements or changes, provide the updated text directly.`;
 
     const handleApply = (value, field) => {
         onApply(field, value);
-        setSuggestion(null);
+        if (!isFullScreen) setSuggestion(null);
     };
 
     const handleCopy = (text) => {
@@ -225,185 +243,203 @@ If they ask for improvements or changes, provide the updated text directly.`;
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const toggleFullScreen = (e) => {
+        e.stopPropagation();
+        setIsFullScreen(!isFullScreen);
+        setIsExpanded(true);
+    };
+
     return (
-        <div className="ai-assistant">
-            <div className="ai-header" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="ai-title">
-                    <Sparkles size={18} />
-                    <span>AI Assistant</span>
-                    <span className="ai-badge">Gemini</span>
+        <div className={`ai-assistant ${isFullScreen ? 'fullscreen' : ''}`}>
+            {/* Header */}
+            <div className="ai-header" onClick={() => !isFullScreen && setIsExpanded(!isExpanded)}>
+                <div className="ai-title-row">
+                    <Sparkles size={18} className="ai-icon-sparkle" />
+                    <h3>AI Assistant</h3>
+                    <span className="ai-badge">Gemini Pro</span>
                 </div>
-                {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            </div>
-
-            {isExpanded && (
-                <div className="ai-content">
-                    {/* Quick Actions */}
-                    <div className="ai-actions">
-                        <button
-                            onClick={() => generateSuggestion('outline')}
-                            disabled={!title || loading}
-                            title="Generate article outline"
-                        >
-                            <ListChecks size={16} />
-                            <span>Outline</span>
-                            {loading === 'outline' && <Loader size={14} className="spin" />}
-                        </button>
-                        <button
-                            onClick={() => generateSuggestion('titles')}
-                            disabled={!title || loading}
-                            title="Generate title ideas"
-                        >
-                            <Heading size={16} />
-                            <span>Titles</span>
-                            {loading === 'titles' && <Loader size={14} className="spin" />}
-                        </button>
-                        <button
-                            onClick={() => generateSuggestion('excerpt')}
-                            disabled={!title || loading}
-                            title="Generate meta description"
-                        >
-                            <FileText size={16} />
-                            <span>Excerpt</span>
-                            {loading === 'excerpt' && <Loader size={14} className="spin" />}
-                        </button>
-                        <button
-                            onClick={() => generateSuggestion('keywords')}
-                            disabled={!title || loading}
-                            title="Suggest keywords"
-                        >
-                            <Wand2 size={16} />
-                            <span>Keywords</span>
-                            {loading === 'keywords' && <Loader size={14} className="spin" />}
-                        </button>
-                    </div>
-
-                    {/* Improve Content Button */}
-                    {content && content.length > 50 && (
-                        <button
-                            className="improve-btn"
-                            onClick={() => generateSuggestion('improve')}
-                            disabled={loading}
-                        >
-                            <RefreshCw size={16} />
-                            Improve My Content
-                            {loading === 'improve' && <Loader size={14} className="spin" />}
+                <div className="header-actions">
+                    <button className="icon-btn" onClick={toggleFullScreen} title={isFullScreen ? "Minimize" : "Expand"}>
+                        {isFullScreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                    </button>
+                    {!isFullScreen && (
+                        isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />
+                    )}
+                    {isFullScreen && (
+                        <button className="icon-btn close-fs" onClick={() => setIsFullScreen(false)}>
+                            <X size={20} />
                         </button>
                     )}
+                </div>
+            </div>
 
-                    {/* Suggestion Result */}
+            {/* Main Content Area */}
+            {(isExpanded || isFullScreen) && (
+                <div className="ai-body">
+                    {/* Quick Tools Panel */}
+                    <div className="ai-tools-panel">
+                        <div className="grid-actions">
+                            <button
+                                onClick={() => generateSuggestion('outline')}
+                                disabled={!title || loading}
+                                className={loading === 'outline' ? 'loading' : ''}
+                            >
+                                <ListChecks size={18} />
+                                <span>Outline</span>
+                            </button>
+                            <button
+                                onClick={() => generateSuggestion('titles')}
+                                disabled={!title || loading}
+                                className={loading === 'titles' ? 'loading' : ''}
+                            >
+                                <Heading size={18} />
+                                <span>Titles</span>
+                            </button>
+                            <button
+                                onClick={() => generateSuggestion('excerpt')}
+                                disabled={!title || loading}
+                                className={loading === 'excerpt' ? 'loading' : ''}
+                            >
+                                <FileText size={18} />
+                                <span>Excerpt</span>
+                            </button>
+                            <button
+                                onClick={() => generateSuggestion('keywords')}
+                                disabled={!title || loading}
+                                className={loading === 'keywords' ? 'loading' : ''}
+                            >
+                                <Wand2 size={18} />
+                                <span>Keywords</span>
+                            </button>
+                        </div>
+
+                        {content && content.length > 50 && (
+                            <button
+                                className="improve-btn-full"
+                                onClick={() => generateSuggestion('improve')}
+                                disabled={loading}
+                            >
+                                <RefreshCw size={16} />
+                                <span>Improve Content</span>
+                                {loading === 'improve' && <Loader size={14} className="spin" />}
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Suggestions Display */}
                     {suggestion && (
-                        <div className={`ai-suggestion ${suggestion.type === 'error' ? 'error' : ''}`}>
-                            <div className="suggestion-header">
-                                <span>{suggestion.title}</span>
-                                <button className="close-btn" onClick={() => setSuggestion(null)}>
-                                    <X size={14} />
-                                </button>
+                        <div className="ai-result-card">
+                            <div className="result-header">
+                                <h4>{suggestion.title}</h4>
+                                <button onClick={() => setSuggestion(null)}><X size={14} /></button>
                             </div>
-                            <div className="suggestion-content">
+                            <div className="result-content">
                                 {suggestion.type === 'titles' ? (
-                                    <div className="title-options">
+                                    <div className="list-options">
                                         {suggestion.content.map((t, i) => (
-                                            <button
-                                                key={i}
-                                                className="title-option"
-                                                onClick={() => handleApply(t, 'title')}
-                                            >
-                                                {t}
-                                                <span className="char-count">{t.length}</span>
-                                            </button>
+                                            <div key={i} className="list-item" onClick={() => handleApply(t, 'title')}>
+                                                <span className="text">{t}</span>
+                                                <span className="apply-hint">Use</span>
+                                            </div>
                                         ))}
                                     </div>
                                 ) : suggestion.type === 'keywords' ? (
-                                    <div className="keyword-options">
+                                    <div className="chips-container">
                                         {suggestion.content.map((k, i) => (
-                                            <button
-                                                key={i}
-                                                className="keyword-chip"
-                                                onClick={() => handleApply(k, 'focusKeyword')}
-                                            >
+                                            <span key={i} className="chip" onClick={() => handleApply(k, 'focusKeyword')}>
                                                 {k}
-                                            </button>
+                                            </span>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-suggestion">
-                                        <pre>{suggestion.content}</pre>
-                                        <div className="suggestion-actions">
-                                            <button onClick={() => handleCopy(suggestion.content)}>
-                                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                                {copied ? 'Copied!' : 'Copy'}
-                                            </button>
-                                            {suggestion.type === 'outline' && (
-                                                <button onClick={() => handleApply(suggestion.content, 'content')}>
-                                                    <RefreshCw size={14} />
-                                                    Use as Content
-                                                </button>
-                                            )}
-                                            {suggestion.type === 'excerpt' && (
-                                                <button onClick={() => handleApply(suggestion.content, 'excerpt')}>
-                                                    <Check size={14} />
-                                                    Apply
-                                                </button>
-                                            )}
-                                            {suggestion.type === 'improve' && (
-                                                <button onClick={() => handleApply(suggestion.content, 'content')}>
-                                                    <Check size={14} />
-                                                    Replace Content
-                                                </button>
-                                            )}
-                                        </div>
+                                    <div className="markdown-preview">
+                                        <ReactMarkdown>{suggestion.content}</ReactMarkdown>
                                     </div>
+                                )}
+                            </div>
+                            {/* Result Actions */}
+                            <div className="result-actions">
+                                <button onClick={() => handleCopy(suggestion.content)}>
+                                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                                    {copied ? 'Copied' : 'Copy'}
+                                </button>
+                                {suggestion.type !== 'titles' && suggestion.type !== 'keywords' && (
+                                    <button className="primary-apply" onClick={() => handleApply(suggestion.content, suggestion.type === 'excerpt' ? 'excerpt' : 'content')}>
+                                        <ArrowRight size={14} />
+                                        Apply to Editor
+                                    </button>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* AI Chat */}
-                    <div className="ai-chat">
-                        <div className="chat-header">
-                            <Bot size={16} />
-                            <span>Ask AI Anything</span>
-                        </div>
+                    {/* Chat Section */}
+                    <div className="chat-interface">
+                        <div className="chat-messages-area" ref={chatRef}>
+                            {chatMessages.length === 0 && !suggestion && (
+                                <div className="empty-state">
+                                    <Bot size={48} />
+                                    <p>How can I help you write better today?</p>
+                                    <div className="quick-starts">
+                                        <button onClick={(e) => handleChatSubmit(e, 'Suggest 3 engaging hooks for this post')}>
+                                            Write an intro hook
+                                        </button>
+                                        <button onClick={(e) => handleChatSubmit(e, 'Give me some pros and cons for this topic')}>
+                                            List Pros & Cons
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
-                        {chatMessages.length > 0 && (
-                            <div className="chat-messages" ref={chatRef}>
-                                {chatMessages.map((msg, i) => (
-                                    <div key={i} className={`chat-message ${msg.role}`}>
-                                        {msg.role === 'assistant' && <Bot size={14} />}
-                                        <div className="message-content">
-                                            <pre>{msg.content}</pre>
-                                        </div>
-                                        {msg.role === 'assistant' && (
-                                            <button
-                                                className="copy-msg-btn"
-                                                onClick={() => handleCopy(msg.content)}
-                                                title="Copy"
-                                            >
+                            {chatMessages.map((msg, i) => (
+                                <div key={i} className={`message-bubble ${msg.role}`}>
+                                    <div className="bubble-content">
+                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    </div>
+                                    {msg.role === 'assistant' && (
+                                        <div className="msg-actions">
+                                            <button onClick={() => handleCopy(msg.content)} title="Copy">
                                                 <Copy size={12} />
                                             </button>
-                                        )}
-                                    </div>
-                                ))}
-                                {chatLoading && (
-                                    <div className="chat-message assistant loading">
-                                        <Bot size={14} />
-                                        <Loader size={14} className="spin" />
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                            <button onClick={() => handleApply(msg.content, 'content')} title="Insert to Editor">
+                                                <ArrowRight size={12} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {chatLoading && (
+                                <div className="message-bubble assistant loading">
+                                    <Loader size={16} className="spin" />
+                                    <span>Thinking...</span>
+                                </div>
+                            )}
+                        </div>
 
-                        <form className="chat-input-form" onSubmit={handleChatSubmit}>
+                        {/* Quick Action Chips */}
+                        <div className="quick-chips">
+                            {QUICK_ACTIONS.map((action, i) => (
+                                <button
+                                    key={i}
+                                    onClick={(e) => handleChatSubmit(e, action.prompt)}
+                                    disabled={chatLoading}
+                                >
+                                    {action.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Input Area */}
+                        <form className="chat-input-row" onSubmit={(e) => handleChatSubmit(e)}>
                             <input
                                 type="text"
                                 value={chatInput}
                                 onChange={(e) => setChatInput(e.target.value)}
-                                placeholder="Ask AI to write, improve, or help..."
+                                placeholder="Type a message or command..."
                                 disabled={chatLoading}
                             />
-                            <button type="submit" disabled={!chatInput.trim() || chatLoading}>
-                                <Send size={16} />
+                            <button type="submit" disabled={!chatInput.trim() || chatLoading} className="send-btn">
+                                <Send size={18} />
                             </button>
                         </form>
                     </div>

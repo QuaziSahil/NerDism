@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { createPost, setAdminAuthenticated } from '../../firebase';
 import SEOAnalyzer from '../../components/SEOAnalyzer/SEOAnalyzer';
-import AIAssistant from '../../components/AIAssistant/AIAssistant';
+// AIAssistant removed
 import ImageUploader from '../../components/ImageUploader/ImageUploader';
 import PostPreview from '../../components/PostPreview/PostPreview';
 import RichTextEditor from '../../components/RichTextEditor/RichTextEditor';
@@ -299,13 +299,7 @@ const Editor = () => {
                         focusKeyword={post.focusKeyword}
                         hasImage={!!post.image}
                     />
-                    <AIAssistant
-                        title={post.title}
-                        excerpt={post.excerpt}
-                        content={post.content}
-                        focusKeyword={post.focusKeyword}
-                        onApply={handleAIApply}
-                    />
+                    {/* AI Assistant removed */}
                 </aside>
             </div>
         </div>

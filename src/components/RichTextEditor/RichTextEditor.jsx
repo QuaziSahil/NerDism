@@ -6,6 +6,7 @@ import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
+import { FontFamily } from '@tiptap/extension-font-family';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Extension } from '@tiptap/core';
@@ -15,7 +16,7 @@ import {
     Quote, Code, Link as LinkIcon, Image as ImageIcon,
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Undo, Redo, Minus, Palette, Highlighter, Type,
-    ChevronDown
+    ChevronDown, CaseSensitive
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import './RichTextEditor.css';
@@ -100,10 +101,21 @@ const FONT_SIZES = [
     { name: 'Huge', value: '28px' },
 ];
 
+const FONTS = [
+    { name: 'Inter', value: 'Inter, sans-serif' },
+    { name: 'Roboto', value: 'Roboto, sans-serif' },
+    { name: 'Oswald', value: 'Oswald, sans-serif' },
+    { name: 'Serif', value: '"Crimson Text", serif' },
+    { name: 'Playfair', value: '"Playfair Display", serif' },
+    { name: 'Monospace', value: '"Space Mono", monospace' },
+    { name: 'Lobster', value: 'Lobster, cursive' },
+];
+
 const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpiece here..." }) => {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showHighlightPicker, setShowHighlightPicker] = useState(false);
     const [showFontSize, setShowFontSize] = useState(false);
+    const [showFontFamily, setShowFontFamily] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -124,6 +136,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                 types: ['heading', 'paragraph'],
             }),
             TextStyle,
+            FontFamily,
             Color,
             Highlight.configure({
                 multicolor: true,
@@ -160,6 +173,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         setShowColorPicker(false);
         setShowHighlightPicker(false);
         setShowFontSize(false);
+        setShowFontFamily(false);
     };
 
     if (!editor) {
@@ -204,7 +218,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
 
                 <div className="toolbar-divider" />
 
-                {/* Headings & Font Size */}
+                {/* Headings & Font Controls */}
                 <div className="toolbar-group">
                     <MenuButton
                         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -221,18 +235,63 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                         <Heading2 size={16} />
                     </MenuButton>
 
+                    {/* Font Family Dropdown */}
+                    <div className="dropdown-wrapper">
+                        <MenuButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowFontFamily(!showFontFamily);
+                                setShowFontSize(false);
+                                setShowColorPicker(false);
+                                setShowHighlightPicker(false);
+                            }}
+                            title="Font Family"
+                            isActive={showFontFamily}
+                        >
+                            <Type size={16} />
+                            <ChevronDown size={12} />
+                        </MenuButton>
+                        {showFontFamily && (
+                            <div className="color-dropdown font-family-dropdown">
+                                {FONTS.map((font) => (
+                                    <button
+                                        key={font.name}
+                                        className="font-family-option"
+                                        style={{ fontFamily: font.value }}
+                                        onClick={() => {
+                                            editor.chain().focus().setFontFamily(font.value).run();
+                                            setShowFontFamily(false);
+                                        }}
+                                    >
+                                        {font.name}
+                                    </button>
+                                ))}
+                                <button
+                                    className="font-family-option reset"
+                                    onClick={() => {
+                                        editor.chain().focus().unsetFontFamily().run();
+                                        setShowFontFamily(false);
+                                    }}
+                                >
+                                    Default Font
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Font Size Dropdown */}
                     <div className="dropdown-wrapper">
                         <MenuButton
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowFontSize(!showFontSize);
+                                setShowFontFamily(false);
                                 setShowColorPicker(false);
                                 setShowHighlightPicker(false);
                             }}
                             title="Font Size"
                         >
-                            <Type size={16} />
+                            <CaseSensitive size={16} />
                             <ChevronDown size={12} />
                         </MenuButton>
                         {showFontSize && (
@@ -257,7 +316,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                         setShowFontSize(false);
                                     }}
                                 >
-                                    Default
+                                    Default Size
                                 </button>
                             </div>
                         )}
@@ -275,6 +334,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                 setShowColorPicker(!showColorPicker);
                                 setShowHighlightPicker(false);
                                 setShowFontSize(false);
+                                setShowFontFamily(false);
                             }}
                             title="Text Color"
                             isActive={editor.isActive('textStyle', { color: /./ })}
@@ -315,6 +375,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                 setShowHighlightPicker(!showHighlightPicker);
                                 setShowColorPicker(false);
                                 setShowFontSize(false);
+                                setShowFontFamily(false);
                             }}
                             isActive={editor.isActive('highlight')}
                             title="Highlight"
