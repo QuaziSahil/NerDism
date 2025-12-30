@@ -5,7 +5,7 @@ import {
     Save, Eye, Layout, Bold, Italic, Heading1, Heading2, Heading3,
     Code, List, Link as LinkIcon, Quote, LogOut, Check, AlertCircle,
     Loader, Undo, Redo, Smile, Table, Clock, FileText, Hash,
-    Monitor, Image as ImageIcon, Maximize2
+    Monitor, Image as ImageIcon, Maximize2, ChevronDown
 } from 'lucide-react';
 import { createPost, setAdminAuthenticated } from '../../firebase';
 import SEOAnalyzer from '../../components/SEOAnalyzer/SEOAnalyzer';
@@ -33,17 +33,34 @@ const Editor = () => {
     const [saveStatus, setSaveStatus] = useState('idle');
     const [saveMessage, setSaveMessage] = useState('');
     const [showEmojis, setShowEmojis] = useState(false);
+    const [showFonts, setShowFonts] = useState(false);
+    const [editorFont, setEditorFont] = useState('Inter, sans-serif');
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [lastSaved, setLastSaved] = useState(null);
     const contentRef = useRef(null);
 
     const categories = ['Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
+    const FONTS = [
+        { name: 'Inter', family: 'Inter, sans-serif' },
+        { name: 'Outfit', family: 'Outfit, sans-serif' },
+        { name: 'Playfair', family: 'Playfair Display, serif' },
+        { name: 'Mono', family: 'Space Mono, monospace' },
+        { name: 'Classic', family: 'Crimson Text, serif' }
+    ];
 
     // Calculate stats
     const words = post.content.trim().split(/\s+/).filter(w => w.length > 0).length;
     const characters = post.content.length;
     const readingTime = Math.max(1, Math.ceil(words / 200));
+
+    const keywordDensity = (() => {
+        if (!post.focusKeyword || !post.content || words === 0) return 0;
+        const escapedKeyword = post.focusKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'gi');
+        const matches = post.content.match(regex);
+        return matches ? ((matches.length / words) * 100).toFixed(1) : 0;
+    })();
 
     // Auto-save to localStorage
     useEffect(() => {
@@ -145,14 +162,29 @@ const Editor = () => {
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selectedText = post.content.substring(start, end);
-        const newText = post.content.substring(0, start) + before + selectedText + after + post.content.substring(end);
+
+        let newText;
+        let newCursorStart;
+        let newCursorEnd;
+
+        if (start === end) {
+            // No selection, insert tags and put cursor in between
+            newText = post.content.substring(0, start) + before + after + post.content.substring(end);
+            newCursorStart = start + before.length;
+            newCursorEnd = start + before.length;
+        } else {
+            // Selection exists, wrap it
+            newText = post.content.substring(0, start) + before + selectedText + after + post.content.substring(end);
+            newCursorStart = start + before.length;
+            newCursorEnd = end + before.length;
+        }
 
         setPost(prev => ({ ...prev, content: newText }));
         saveToHistory(newText);
 
         setTimeout(() => {
             textarea.focus();
-            textarea.setSelectionRange(start + before.length, end + before.length);
+            textarea.setSelectionRange(newCursorStart, newCursorEnd);
         }, 0);
     };
 
@@ -238,16 +270,76 @@ const Editor = () => {
 
     const renderMarkdown = (text) => {
         if (!text) return '';
-        return text
-            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code>$1</code>')
-            .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-            .replace(/^- (.*$)/gim, '<li>$1</li>')
-            .replace(/\n/g, '<br/>');
+
+        // Escape HTML
+        let html = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // Headers (must be at start of line)
+        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+        // Bold & Italic
+        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        // Lists
+        html = html.replace(/^\s*-\s+(.*$)/gim, '<li>$1</li>');
+        // Wrap adjacent li in ul
+        html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+        // Simple fix for nested lists or multiple ul
+        html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+        // Links & Images
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius:8px;" />');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+        // Code & Blockquotes
+        html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+        html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+        // Tables (Basic)
+        if (html.includes('|')) {
+            const lines = html.split('\n');
+            let inTable = false;
+            let tableHtml = '<div class="table-container"><table>';
+
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim().startsWith('|')) {
+                    if (!inTable) {
+                        inTable = true;
+                        tableHtml = '<div class="table-container"><table>';
+                    }
+                    const cells = lines[i].split('|').filter(c => c.trim() !== '');
+                    const rowTag = i === 0 || (lines[i + 1] && lines[i + 1].includes('---')) ? 'th' : 'td';
+
+                    if (!lines[i].includes('---')) {
+                        tableHtml += '<tr>' + cells.map(c => `<${rowTag}>${c.trim()}</${rowTag}>`).join('') + '</tr>';
+                    }
+                } else if (inTable) {
+                    inTable = false;
+                    tableHtml += '</table></div>';
+                    lines[i] = tableHtml + '\n' + lines[i];
+                }
+            }
+            if (inTable) tableHtml += '</table></div>';
+            // This table logic is complex for regex, keeping it simple for now or better use a lib
+        }
+
+        // Paragraphs (Double newlines)
+        const parts = html.split(/\n\n+/);
+        html = parts.map(p => {
+            if (p.trim().startsWith('<h') || p.trim().startsWith('<ul') || p.trim().startsWith('<blockquote') || p.trim().startsWith('<div')) {
+                return p;
+            }
+            return `<p>${p.replace(/\n/g, '<br/>')}</p>`;
+        }).join('');
+
+        return html;
     };
 
     // Full Website Preview
@@ -408,6 +500,29 @@ const Editor = () => {
                             </div>
                             <div className="toolbar-divider" />
                             <div className="toolbar-group">
+                                <div className="font-switcher">
+                                    <button onClick={() => setShowFonts(!showFonts)} className="font-btn" title="Choose Font">
+                                        <span style={{ fontFamily: editorFont }}>Ag</span>
+                                        <ChevronDown size={14} />
+                                    </button>
+                                    {showFonts && (
+                                        <div className="font-dropdown">
+                                            {FONTS.map(f => (
+                                                <button
+                                                    key={f.name}
+                                                    onClick={() => {
+                                                        setEditorFont(f.family);
+                                                        setShowFonts(false);
+                                                    }}
+                                                    style={{ fontFamily: f.family }}
+                                                    className={editorFont === f.family ? 'active' : ''}
+                                                >
+                                                    {f.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                                 <button onClick={insertTable} title="Table"><Table size={16} /></button>
                                 <div className="emoji-wrapper">
                                     <button onClick={() => setShowEmojis(!showEmojis)} title="Emoji"><Smile size={16} /></button>
@@ -446,6 +561,7 @@ const Editor = () => {
                                 value={post.content}
                                 onChange={handleChange}
                                 placeholder="Write your masterpiece here... Use Markdown or the toolbar above!"
+                                style={{ fontFamily: editorFont }}
                             />
                         </div>
                     )}
@@ -455,6 +571,9 @@ const Editor = () => {
                         <span><FileText size={14} /> {words} words</span>
                         <span>{characters} characters</span>
                         <span><Clock size={14} /> {readingTime} min read</span>
+                        <span className={`density ${keywordDensity > 2.5 ? 'warning' : ''}`}>
+                            🎯 Density: {keywordDensity}%
+                        </span>
                         {lastSaved && (
                             <button className="clear-draft-btn" onClick={clearDraft}>Clear Draft</button>
                         )}

@@ -11,6 +11,9 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
 const callGeminiAPI = async (prompt) => {
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'undefined') {
+        throw new Error('API_KEY_MISSING');
+    }
     try {
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
@@ -156,8 +159,10 @@ const AIAssistant = ({ title, excerpt, content, focusKeyword, onApply }) => {
         } catch (error) {
             setSuggestion({
                 type: 'error',
-                title: '❌ Error',
-                content: 'Failed to generate content. Please try again.'
+                title: '❌ Configuration Error',
+                content: error.message === 'API_KEY_MISSING'
+                    ? 'Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel Environment Variables and Redeploy.'
+                    : 'Failed to generate content. This might be due to a blocked or invalid API key.'
             });
         }
 
@@ -200,7 +205,9 @@ If they ask for improvements or changes, provide the updated text directly.`;
         } catch (error) {
             setChatMessages(prev => [...prev, {
                 role: 'assistant',
-                content: 'Sorry, I encountered an error. Please try again.'
+                content: error.message === 'API_KEY_MISSING'
+                    ? '⚠️ Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your Vercel Environment Variables.'
+                    : 'Sorry, I encountered an error. This usually happens if the API key is invalid or rate limited.'
             }]);
         }
 

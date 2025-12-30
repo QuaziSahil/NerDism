@@ -304,6 +304,53 @@
     margin: 0 6px;
 }
 
+/* Font Switcher */
+.font-switcher {
+    position: relative;
+    margin-right: 4px;
+}
+
+.font-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 0 8px !important;
+    width: auto !important;
+    min-width: 50px;
+    font-size: 0.8rem !important;
+}
+
+.font-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 100;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    min-width: 120px;
+}
+
+.font-dropdown button {
+    width: 100% !important;
+    padding: 8px 12px !important;
+    justify-content: flex-start !important;
+    font-size: 0.9rem !important;
+    height: auto !important;
+    text-align: left;
+}
+
+.font-dropdown button.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-color);
+}
+
 /* Emoji Picker */
 .emoji-wrapper {
     position: relative;
@@ -420,6 +467,18 @@
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.density {
+    padding: 2px 8px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.density.warning {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
 }
 
 .clear-draft-btn {
