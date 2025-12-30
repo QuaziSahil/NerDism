@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 import './AIAssistant.css';
 
-// Google Gemini API - Key loaded from environment variable
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Google Gemini API
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAac0atmOaQW8NVdEbqWtcIedypesnNMvI';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
 const callGeminiAPI = async (prompt) => {
