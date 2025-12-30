@@ -8,6 +8,7 @@ import Contact from './pages/Contact';
 import Categories from './pages/Categories';
 import Login from './pages/Admin/Login';
 import Editor from './pages/Admin/Editor';
+import CustomCursor from './components/UiEffects/CustomCursor';
 import { isAdminAuthenticated } from './firebase';
 
 // Protected Route Component
@@ -22,6 +23,7 @@ function App() {
   return (
     <Router>
       <div className="app">
+        <CustomCursor />
         <Navbar />
         <main>
           <Routes>

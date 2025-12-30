@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, User, Share2, Twitter, Facebook, Linkedin, ArrowLeft, Loader } from 'lucide-react';
 import { getPostBySlug, getPublishedPosts } from '../firebase';
 import SEO from '../components/SEO/SEO';
+import TableOfContents from '../components/TableOfContents/TableOfContents';
+import Comments from '../components/Comments/Comments';
 import './Post.css';
 
 const Post = () => {
@@ -238,6 +240,9 @@ const Post = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Comments Section */}
+                    {post && <Comments postId={post.id} />}
                 </div>
             </div>
         </article>

@@ -1,0 +1,68 @@
+.custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    /* Center the cursor */
+    transform: translate(-50%, -50%);
+}
+
+/* The precision dot */
+.cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* The crosshair ring */
+.cursor-crosshair {
+    width: 40px;
+    height: 40px;
+    border: 1px dashed var(--accent-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+    transition: all 0.15s ease-out;
+    animation: rotate 10s linear infinite;
+}
+
+/* Hover State - Snaps to target */
+.custom-cursor.hovering .cursor-crosshair {
+    width: 60px;
+    height: 60px;
+    border-style: solid;
+    border-width: 2px;
+    opacity: 1;
+    background: rgba(99, 102, 241, 0.1);
+    animation: none;
+}
+
+.custom-cursor.hovering .cursor-dot {
+    background: white;
+}
+
+@keyframes rotate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@media (pointer: coarse) {
+    .custom-cursor {
+        display: none;
+    }
+}

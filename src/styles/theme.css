@@ -29,10 +29,28 @@
     --text-primary: #F5F5F5;
     --text-secondary: #A3A3A3;
     --accent-primary: #4A7AB0;
-    /* Lighter blue for dark mode */
     --accent-secondary: #1E3A5F;
     --border-color: #333333;
     --card-bg: #141414;
+}
+
+/* ===== COSMIC ROSE THEME (Light Mode) ===== */
+[data-theme='light'] {
+    /* Deep cosmic purple - NO WHITE */
+    --bg-primary: #1a0a14;
+    --bg-secondary: #2d1b2e;
+    --text-primary: #f8d7e8;
+    --text-secondary: rgba(248, 215, 232, 0.7);
+    --accent-primary: #d946a8;
+    --accent-secondary: #9f1d70;
+    --border-color: rgba(217, 70, 168, 0.2);
+    --card-bg: rgba(45, 27, 46, 0.6);
+
+    /* Rose/Purple Orbs */
+    --orb-opacity: 0.4;
+    --orb-1-color: linear-gradient(135deg, #9f1d70, #6b21a8);
+    --orb-2-color: linear-gradient(135deg, #be185d, #831843);
+    --orb-3-color: linear-gradient(135deg, #7c3aed, #4c1d95);
 }
 
 body {

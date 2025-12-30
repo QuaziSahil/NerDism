@@ -11,6 +11,18 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Dark Mode Defaults */
+  --bg-primary: #242424;
+  --bg-secondary: #1a1a1a;
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --accent-color: #646cff;
+  --border-color: rgba(255, 255, 255, 0.1);
+
+  /* Visuals */
+  --orb-opacity: 0.5;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 a {
@@ -18,6 +30,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -46,23 +59,56 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* ===== COSMIC ROSE THEME (Light Mode Toggle) ===== */
+[data-theme='light'] {
+  /* Base - Deep cosmic purple, NOT white */
+  color: #f8d7e8;
+  background: linear-gradient(135deg, #1a0a14 0%, #2d1b2e 50%, #1a0a1a 100%);
+  background-attachment: fixed;
+
+  /* Colors */
+  --bg-primary: #1a0a14;
+  --bg-secondary: rgba(45, 27, 46, 0.6);
+  --text-primary: #f8d7e8;
+  --text-secondary: rgba(248, 215, 232, 0.7);
+  --accent-color: #d946a8;
+  --border-color: rgba(217, 70, 168, 0.2);
+
+  /* Rose/Purple Visuals */
+  --orb-opacity: 0.4;
+  --glass-bg: rgba(139, 69, 116, 0.15);
+  --glass-border: rgba(217, 70, 168, 0.15);
+
+  /* Cosmic Orb Gradients - Rose/Magenta/Purple */
+  --orb-1-color: linear-gradient(135deg, #9f1d70, #6b21a8);
+  --orb-2-color: linear-gradient(135deg, #be185d, #831843);
+  --orb-3-color: linear-gradient(135deg, #7c3aed, #4c1d95);
+}
+
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+
+  /* System light preference fallback - also cosmic */
+  :root:not([data-theme]) {
+    color: #f8d7e8;
+    background: linear-gradient(135deg, #1a0a14, #2d1b2e, #1a0a1a);
   }
+
   a:hover {
-    color: #747bff;
+    color: #f472b6;
   }
+
   button {
-    background-color: #f9f9f9;
+    background-color: rgba(139, 69, 116, 0.2);
+    color: #f8d7e8;
   }
 }

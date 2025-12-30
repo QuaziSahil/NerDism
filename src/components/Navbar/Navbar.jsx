@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X, Search } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import SearchOverlay from '../SearchOverlay/SearchOverlay';
 import './Navbar.css';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
@@ -26,82 +28,95 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-            <div className="container navbar-container">
+        <>
+            <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-                {/* Stylish Logo Text */}
-                <NavLink to="/" className="logo">
-                    <motion.span
-                        className="logo-text"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                        whileHover={{ scale: 1.05 }}
-                    >
-                        <span className="logo-ner">Ner</span>
-                        <span className="logo-dism">Dism</span>
-                    </motion.span>
-                </NavLink>
+            <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+                <div className="container navbar-container">
 
-                {/* Desktop Links */}
-                <div className="nav-links">
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.name}
-                            to={item.path}
-                            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                    {/* Stylish Logo Text */}
+                    <NavLink to="/" className="logo">
+                        <motion.span
+                            className="logo-text"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                            whileHover={{ scale: 1.05 }}
                         >
-                            {item.name}
-                        </NavLink>
-                    ))}
-                </div>
+                            <span className="logo-ner">Ner</span>
+                            <span className="logo-dism">Dism</span>
+                        </motion.span>
+                    </NavLink>
 
-                {/* Actions */}
-                <div className="nav-actions">
-                    <motion.button
-                        className="theme-toggle"
-                        onClick={toggleTheme}
-                        whileTap={{ scale: 0.9 }}
-                        whileHover={{ rotate: 180 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                    </motion.button>
-
-                    {/* Mobile Toggle */}
-                    <button
-                        className="mobile-toggle"
-                        onClick={() => setIsMobileOpen(!isMobileOpen)}
-                    >
-                        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </div>
-
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {isMobileOpen && (
-                    <motion.div
-                        className="mobile-menu"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                    >
+                    {/* Desktop Links */}
+                    <div className="nav-links">
                         {navItems.map((item) => (
                             <NavLink
                                 key={item.name}
                                 to={item.path}
-                                className="nav-link"
-                                onClick={() => setIsMobileOpen(false)}
+                                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                             >
                                 {item.name}
                             </NavLink>
                         ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </nav>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="nav-actions">
+                        <motion.button
+                            className="theme-toggle"
+                            onClick={() => setIsSearchOpen(true)}
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.1 }}
+                        >
+                            <Search size={20} />
+                        </motion.button>
+
+                        <motion.button
+                            className="theme-toggle"
+                            onClick={toggleTheme}
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ rotate: 180 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                        </motion.button>
+
+                        {/* Mobile Toggle */}
+                        <button
+                            className="mobile-toggle"
+                            onClick={() => setIsMobileOpen(!isMobileOpen)}
+                        >
+                            {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {isMobileOpen && (
+                        <motion.div
+                            className="mobile-menu"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {navItems.map((item) => (
+                                <NavLink
+                                    key={item.name}
+                                    to={item.path}
+                                    className="nav-link"
+                                    onClick={() => setIsMobileOpen(false)}
+                                >
+                                    {item.name}
+                                </NavLink>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </nav>
+        </>
     );
 };
 

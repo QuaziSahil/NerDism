@@ -242,6 +242,56 @@ export const updatePost = async (postId, postData) => {
 /**
  * Delete post
  */
+// ==========================================
+// COMMENTS SYSTEM
+// ==========================================
+
+/**
+ * Add a new comment
+ */
+export const addComment = async (postId, commentData) => {
+    try {
+        const comment = {
+            postId,
+            author: commentData.name || 'Anonymous',
+            content: commentData.content,
+            createdAt: serverTimestamp(),
+            // In a real app, you'd want some auth or captcha here
+        };
+        await addDoc(collection(db, 'nerdism_comments'), comment);
+        return { success: true };
+    } catch (error) {
+        console.error('[Comments] Error adding:', error);
+        return { success: false, error };
+    }
+};
+
+/**
+ * Get comments for a post
+ */
+export const getComments = async (postId) => {
+    try {
+        const commentsRef = collection(db, 'nerdism_comments');
+        const q = query(
+            commentsRef,
+            where('postId', '==', postId),
+            orderBy('createdAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.() || new Date()
+        }));
+    } catch (error) {
+        console.error('[Comments] Error fetching:', error);
+        return [];
+    }
+};
+
+/**
+ * Delete post (and associated comments - optional cleanup)
+ */
 export const deletePost = async (postId) => {
     try {
         await deleteDoc(doc(db, 'nerdism_posts', postId));
