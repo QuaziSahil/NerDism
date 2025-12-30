@@ -10,6 +10,7 @@ import SEOAnalyzer from '../../components/SEOAnalyzer/SEOAnalyzer';
 // AIAssistant removed
 import ImageUploader from '../../components/ImageUploader/ImageUploader';
 import PostPreview from '../../components/PostPreview/PostPreview';
+import SocialPreview from '../../components/SocialPreview/SocialPreview';
 import RichTextEditor from '../../components/RichTextEditor/RichTextEditor';
 import './Editor.css';
 
@@ -17,6 +18,7 @@ const Editor = () => {
     const navigate = useNavigate();
     const [post, setPost] = useState({
         title: '',
+        slug: '', // New slug field
         excerpt: '',
         content: '',
         category: 'Tech',
@@ -29,8 +31,21 @@ const Editor = () => {
     const [saveStatus, setSaveStatus] = useState('idle');
     const [saveMessage, setSaveMessage] = useState('');
     const [lastSaved, setLastSaved] = useState(null);
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false); // Track manual edits
 
     const categories = ['Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
+
+    // Helper to generate slug
+    const generateSlug = (text) => {
+        return text
+            .toString()
+            .toLowerCase()
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .replace(/^-+/, '')             // Trim - from start
+            .replace(/-+$/, '');            // Trim - from end
+    };
 
     // Calculate stats - Strip HTML tags for accurate word count
     const textContent = post.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -54,9 +69,21 @@ const Editor = () => {
                 const draft = JSON.parse(saved);
                 setPost(draft);
                 setLastSaved(new Date(draft.savedAt));
+                // If loaded from draft, assume slug might be manually edited if it differs from auto-generated
+                if (draft.slug && draft.slug !== generateSlug(draft.title)) {
+                    setIsSlugManuallyEdited(true);
+                }
             } catch (e) { }
         }
     }, []);
+
+    // Auto-generate slug from title if not manually edited
+    useEffect(() => {
+        if (!isSlugManuallyEdited && post.title) {
+            const newSlug = generateSlug(post.title);
+            setPost(prev => ({ ...prev, slug: newSlug }));
+        }
+    }, [post.title, isSlugManuallyEdited]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -74,6 +101,11 @@ const Editor = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setPost(prev => ({ ...prev, [name]: value }));
+
+        // If user edits slug, mark as manually edited
+        if (name === 'slug') {
+            setIsSlugManuallyEdited(true);
+        }
     };
 
     // AI Assistant apply function
@@ -99,7 +131,8 @@ const Editor = () => {
             localStorage.removeItem('nerdism_draft');
 
             setTimeout(() => {
-                setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
+                setPost({ title: '', slug: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
+                setIsSlugManuallyEdited(false);
                 setSaveStatus('idle');
                 setSaveMessage('');
             }, 3000);
@@ -116,7 +149,8 @@ const Editor = () => {
 
     const clearDraft = () => {
         localStorage.removeItem('nerdism_draft');
-        setPost({ title: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
+        setPost({ title: '', slug: '', excerpt: '', content: '', category: 'Tech', image: '', focusKeyword: '' });
+        setIsSlugManuallyEdited(false);
         setLastSaved(null);
     };
 
@@ -210,6 +244,22 @@ const Editor = () => {
                         </span>
                     </div>
 
+                    {/* Slug / Permalink Input */}
+                    <div className="form-group slug-group">
+                        <label className="slug-label">Permalink:</label>
+                        <div className="slug-input-wrapper">
+                            <span className="slug-prefix">nerdism.com/blog/</span>
+                            <input
+                                type="text"
+                                name="slug"
+                                value={post.slug}
+                                onChange={handleChange}
+                                placeholder="my-awesome-post-url"
+                                className="slug-input"
+                            />
+                        </div>
+                    </div>
+
                     {/* Meta Row */}
                     <div className="meta-row">
                         <div className="form-group">
@@ -299,7 +349,12 @@ const Editor = () => {
                         focusKeyword={post.focusKeyword}
                         hasImage={!!post.image}
                     />
-                    {/* AI Assistant removed */}
+                    <SocialPreview
+                        title={post.title}
+                        excerpt={post.excerpt}
+                        image={post.image}
+                        slug={post.slug}
+                    />
                 </aside>
             </div>
         </div>

@@ -180,12 +180,15 @@ export const getPostBySlug = async (slug) => {
  */
 export const createPost = async (postData) => {
     try {
-        const slug = generateSlug(postData.title);
+        // Use provided slug or generate from title
+        const slug = postData.slug && postData.slug.trim()
+            ? postData.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+            : generateSlug(postData.title);
 
         // Check if slug exists
         const existing = await getPostBySlug(slug);
         if (existing) {
-            return { success: false, message: 'A post with this title already exists.' };
+            return { success: false, message: 'A post with this URL (slug) already exists. Please choose another.' };
         }
 
         const post = {

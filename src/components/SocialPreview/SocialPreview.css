@@ -1,0 +1,153 @@
+.social-preview-container {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Facebook/Twitter Card Style */
+.preview-card {
+    background: #ffffff;
+    /* Always white for consistency with social cards */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin-bottom: 20px;
+}
+
+.preview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-image {
+    width: 100%;
+    height: 160px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 12px;
+    background: #F0F2F5;
+    /* Facebook card bg */
+    border-top: 1px solid #e5e7eb;
+}
+
+.card-domain {
+    display: block;
+    font-size: 0.75rem;
+    color: #65676B;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #050505;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-desc {
+    font-size: 0.85rem;
+    color: #65676B;
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Google Search Result Style */
+.google-preview {
+    margin-top: 10px;
+}
+
+.google-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.google-card {
+    background: var(--card-bg);
+    /* Use theme bg for google since it's transparent usually */
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.google-url {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.site-name {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.url-path {
+    color: var(--text-secondary);
+}
+
+.google-title {
+    display: block;
+    color: #8ab4f8;
+    /* Google blue link dark mode */
+    font-size: 1.1rem;
+    line-height: 1.3;
+    text-decoration: none;
+    margin-bottom: 4px;
+}
+
+.google-title:hover {
+    text-decoration: underline;
+}
+
+.google-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

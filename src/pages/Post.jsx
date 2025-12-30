@@ -71,12 +71,17 @@ const Post = () => {
         );
     }
 
-    // Render markdown content
+    // Render markdown content with IDs for TOC
     const renderContent = (text) => {
         if (!text) return '';
+
+        // Helper to slugify text for IDs
+        const slugify = (text) => text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
         return text
-            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            // Add IDs to headers for TOC
+            .replace(/^### (.*$)/gim, (match, title) => `<h3 id="${slugify(title)}">${title}</h3>`)
+            .replace(/^## (.*$)/gim, (match, title) => `<h2 id="${slugify(title)}">${title}</h2>`)
             .replace(/^# (.*$)/gim, '<h1>$1</h1>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -106,6 +111,8 @@ const Post = () => {
                 description={post.excerpt}
                 image={post.image}
                 url={`/blog/${slug}`}
+                publishDate={post.publishedAt}
+                modifiedDate={post.updatedAt}
             />
 
             {/* Hero Section */}
@@ -173,6 +180,7 @@ const Post = () => {
             <div className="container post-container">
                 {/* Sidebar */}
                 <aside className="post-sidebar">
+                    <TableOfContents content={post.content} />
                     <div className="sticky-sidebar">
                         <div className="share-buttons">
                             <button className="share-btn twitter">
