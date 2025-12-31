@@ -270,6 +270,25 @@ const Post = () => {
                     </div>
                 </aside>
             </div>
+
+            {/* Mobile Share Bar - Fixed at Bottom */}
+            <div className="mobile-share-bar">
+                <div className="share-label">Share this article</div>
+                <div className="share-buttons">
+                    <button className="share-btn twitter" onClick={() => handleShare('twitter')} title="Share on Twitter">
+                        <Twitter size={20} />
+                    </button>
+                    <button className="share-btn facebook" onClick={() => handleShare('facebook')} title="Share on Facebook">
+                        <Facebook size={20} />
+                    </button>
+                    <button className="share-btn linkedin" onClick={() => handleShare('linkedin')} title="Share on LinkedIn">
+                        <Linkedin size={20} />
+                    </button>
+                    <button className="share-btn native" onClick={() => handleShare('native')} title="Share">
+                        <Share2 size={20} />
+                    </button>
+                </div>
+            </div>
         </article>
     );
 };

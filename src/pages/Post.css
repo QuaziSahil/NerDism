@@ -328,6 +328,80 @@
 /* ========== Floating Share Bar - MOBILE ========== */
 .mobile-share-bar {
     display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 10, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 12px 20px;
+    z-index: 1000;
+    border-top: 1px solid rgba(217, 70, 168, 0.2);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-share-bar .share-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.mobile-share-bar .share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.mobile-share-bar .share-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-share-bar .share-btn:active {
+    transform: scale(0.95);
+    background: var(--accent-primary, #d946a8);
+    color: #fff;
+}
+
+.mobile-share-bar .share-btn.twitter:hover,
+.mobile-share-bar .share-btn.twitter:active {
+    background: #1DA1F2;
+    border-color: #1DA1F2;
+    color: #fff;
+}
+
+.mobile-share-bar .share-btn.facebook:hover,
+.mobile-share-bar .share-btn.facebook:active {
+    background: #1877F2;
+    border-color: #1877F2;
+    color: #fff;
+}
+
+.mobile-share-bar .share-btn.linkedin:hover,
+.mobile-share-bar .share-btn.linkedin:active {
+    background: #0A66C2;
+    border-color: #0A66C2;
+    color: #fff;
+}
+
+.mobile-share-bar .share-btn.native:hover,
+.mobile-share-bar .share-btn.native:active {
+    background: var(--accent-primary, #d946a8);
+    border-color: var(--accent-primary, #d946a8);
+    color: #fff;
 }
 
 /* ========== MOBILE RESPONSIVE ========== */
@@ -410,6 +484,11 @@
     /* Related Posts */
     .related-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* Show Mobile Share Bar */
+    .mobile-share-bar {
+        display: block;
     }
 }
 
