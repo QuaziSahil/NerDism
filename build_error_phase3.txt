@@ -1,0 +1,117 @@
+﻿[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 54 modules transformed.
+node.exe : 
+[31mÔ£ù[39m Build 
+failed in 758ms
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mÔ£   
+ ù[39m Build fai    
+led in 758ms:Str    
+ing) [], RemoteE    
+xception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31m[vite:esbuild] 
+Transform failed 
+with 1 error:
+C:/Users/rehan/New Ap
+ps/NerDism/src/compon
+ents/RichTextEditor/R
+ichTextEditor.jsx:26:
+4: ERROR: The symbol 
+"Youtube" has 
+already been 
+declared[31m
+file: [36mC:/Users/r
+ehan/New Apps/NerDism
+/src/components/RichT
+extEditor/RichTextEdi
+tor.jsx:26:4[31m
+[33m
+[33mThe symbol 
+"Youtube" has 
+already been 
+declared[33m
+24 |      
+ChevronDown, 
+CaseSensitive, 
+Keyboard, Search, X, 
+Check, Save,
+25 |      Table as 
+TableIcon, 
+PlusCircle, Trash2, 
+Info, AlertTriangle, 
+Lightbulb, FileCode,
+26 |      Youtube, 
+Twitter, Video
+   |      ^
+27 |  } from 
+'lucide-react';
+28 |  import { 
+useState, 
+useCallback, useRef, 
+useEffect, useMemo } 
+from 'react';
+[31m
+    at 
+failureErrorWithLog 
+(C:\Users\rehan\New A
+pps\NerDism\node_modu
+les\esbuild\lib\main.
+js:1467:15)
+    at 
+C:\Users\rehan\New Ap
+ps\NerDism\node_modul
+es\esbuild\lib\main.j
+s:736:50
+    at responseCallba
+cks.<computed> 
+(C:\Users\rehan\New A
+pps\NerDism\node_modu
+les\esbuild\lib\main.
+js:603:9)
+    at 
+handleIncomingPacket 
+(C:\Users\rehan\New A
+pps\NerDism\node_modu
+les\esbuild\lib\main.
+js:658:12)
+    at Socket.readFro
+mStdout 
+(C:\Users\rehan\New A
+pps\NerDism\node_modu
+les\esbuild\lib\main.
+js:581:7)
+    at Socket.emit 
+(node:events:508:28)
+    at addChunk (node
+:internal/streams/rea
+dable:559:12)
+    at readableAddChu
+nkPushByteMode (node:
+internal/streams/read
+able:510:3)
+    at Readable.push 
+(node:internal/stream
+s/readable:390:5)
+    at 
+Pipe.onStreamRead (no
+de:internal/stream_ba
+se_commons:189:23)[3
+9m

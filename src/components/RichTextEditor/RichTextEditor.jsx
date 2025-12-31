@@ -14,6 +14,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
+import Youtube from '@tiptap/extension-youtube';
 import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     Heading1, Heading2, Heading3, List, ListOrdered,
@@ -21,7 +22,8 @@ import {
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Undo, Redo, Minus, Palette, Highlighter, Type,
     ChevronDown, CaseSensitive, Keyboard, Search, X, Check, Save,
-    Table as TableIcon, PlusCircle, Trash2, Info, AlertTriangle, Lightbulb, FileCode
+    Table as TableIcon, PlusCircle, Trash2, Info, AlertTriangle, Lightbulb, FileCode,
+    Youtube as YoutubeIcon, Twitter as TwitterIcon, Video
 } from 'lucide-react';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -137,6 +139,9 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
     const [showTableMenu, setShowTableMenu] = useState(false);
     const [showCalloutMenu, setShowCalloutMenu] = useState(false);
 
+    // Phase 3: Embed State
+    const [showEmbedMenu, setShowEmbedMenu] = useState(false);
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -169,6 +174,10 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
             TableRow,
             TableCell,
             TableHeader,
+            // Phase 3: YouTube
+            Youtube.configure({
+                controls: false,
+            }),
         ],
         content: content || '',
         onUpdate: ({ editor }) => {
@@ -185,6 +194,28 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         const url = prompt('Enter URL:');
         if (url) {
             editor?.chain().focus().setLink({ href: url }).run();
+        }
+    }, [editor]);
+
+    // Phase 3: Embed Handlers
+    const addYoutube = useCallback(() => {
+        const url = prompt('Enter YouTube URL:');
+        if (url) {
+            editor?.chain().focus().setYoutubeVideo({ src: url }).run();
+            setShowEmbedMenu(false);
+        }
+    }, [editor]);
+
+    const addTwitter = useCallback(() => {
+        // Twitter embed (basic blockquote method for now)
+        const url = prompt('Enter Tweet URL:');
+        if (url) {
+            const tweetId = url.split('/').pop().split('?')[0];
+            // We can't easily auto-embed scripts in basic editor without more complex handling,
+            // so we'll just insert a link that looks like an embed or use OEmbed if we had a backend.
+            // For now, let's insert a styled visual link/card.
+            editor?.chain().focus().insertContent(`<blockquote class="twitter-tweet"><a href="${url}">View Tweet</a></blockquote>`).run();
+            setShowEmbedMenu(false);
         }
     }, [editor]);
 
@@ -220,8 +251,11 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
             await uploadBytes(storageRef, file);
             const url = await getDownloadURL(storageRef);
 
+            // Prompt for Alt Text
+            const altText = prompt('Enter image description (Alt Text):', file.name.split('.')[0]);
+
             // Insert image into editor
-            editor?.chain().focus().setImage({ src: url }).run();
+            editor?.chain().focus().setImage({ src: url, alt: altText || '' }).run();
         } catch (error) {
             console.error('Image upload error:', error);
             alert('Failed to upload image. Please try again.');
@@ -246,6 +280,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         setShowFontFamily(false);
         setShowTableMenu(false);
         setShowCalloutMenu(false);
+        setShowEmbedMenu(false);
     };
 
     // Word and Character Count
@@ -758,6 +793,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                 e.stopPropagation();
                                 setShowCalloutMenu(!showCalloutMenu);
                                 setShowTableMenu(false);
+                                setShowEmbedMenu(false);
                             }}
                             title="Insert Callout Box"
                         >
@@ -793,6 +829,40 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                     }}
                                 >
                                     <Lightbulb size={14} /> Tip Box
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Media Embed Dropdown */}
+                    <div className="dropdown-wrapper">
+                        <MenuButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowEmbedMenu(!showEmbedMenu);
+                                setShowTableMenu(false);
+                                setShowCalloutMenu(false);
+                            }}
+                            isActive={editor.isActive('youtube')}
+                            title="Embed Media"
+                        >
+                            <Video size={16} />
+                            <ChevronDown size={12} />
+                        </MenuButton>
+                        {showEmbedMenu && (
+                            <div className="color-dropdown callout-dropdown">
+                                <div className="dropdown-title">Embed Media</div>
+                                <button
+                                    className="dropdown-btn"
+                                    onClick={addYoutube}
+                                >
+                                    <YoutubeIcon size={14} /> YouTube
+                                </button>
+                                <button
+                                    className="dropdown-btn"
+                                    onClick={addTwitter}
+                                >
+                                    <TwitterIcon size={14} /> Twitter / X
                                 </button>
                             </div>
                         )}

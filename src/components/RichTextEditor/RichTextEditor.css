@@ -464,6 +464,47 @@
     opacity: 0.8;
 }
 
+/* ========== Embeds ========== */
+/* YouTube */
+.rich-editor-content div[data-youtube-video] {
+    cursor: move;
+    padding-right: 24px;
+}
+
+.rich-editor-content iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    border: none;
+    background: #000;
+    margin: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Twitter */
+.rich-editor-content .twitter-tweet {
+    border-left: 4px solid #1DA1F2;
+    background: rgba(29, 161, 242, 0.1);
+    color: #1DA1F2;
+    padding: 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+}
+
+.rich-editor-content .twitter-tweet a {
+    color: #1DA1F2;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rich-editor-content .twitter-tweet a:hover {
+    text-decoration: underline;
+}
+
 /* Images */
 .rich-editor-content img,
 .rich-editor-content .editor-image {
