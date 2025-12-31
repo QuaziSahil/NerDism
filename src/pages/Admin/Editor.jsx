@@ -323,6 +323,8 @@ const Editor = () => {
                             content={post.content}
                             onChange={(html) => setPost(prev => ({ ...prev, content: html }))}
                             placeholder="Start writing your amazing content..."
+                            title={post.title}
+                            description={post.excerpt}
                         />
                     )}
 

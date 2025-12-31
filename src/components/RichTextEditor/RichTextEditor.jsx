@@ -23,7 +23,8 @@ import {
     Undo, Redo, Minus, Palette, Highlighter, Type,
     ChevronDown, CaseSensitive, Keyboard, Search, X, Check, Save,
     Table as TableIcon, PlusCircle, Trash2, Info, AlertTriangle, Lightbulb, FileCode,
-    Youtube as YoutubeIcon, Twitter as TwitterIcon, Video
+    Youtube as YoutubeIcon, Twitter as TwitterIcon, Video,
+    BarChart2
 } from 'lucide-react';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -32,6 +33,7 @@ import { getSlashCommandExtension } from './slashCommand';
 import { CustomHeading } from './CustomHeading';
 import { Column, Columns } from './extensions/ColumnExtension';
 import { Details, Summary, DetailsContent } from './extensions/CollapsibleExtension';
+import { SEODashboard } from './SEODashboard';
 import 'tippy.js/dist/tippy.css';
 import './RichTextEditor.css';
 
@@ -125,7 +127,7 @@ const FONTS = [
     { name: 'Lobster', value: 'Lobster, cursive' },
 ];
 
-const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpiece here...", onAutoSave }) => {
+const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpiece here...", onAutoSave, title = '', description = '' }) => {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showHighlightPicker, setShowHighlightPicker] = useState(false);
     const [showFontSize, setShowFontSize] = useState(false);
@@ -146,6 +148,9 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
 
     // Phase 3: Embed State
     const [showEmbedMenu, setShowEmbedMenu] = useState(false);
+
+    // Phase 6: SEO State
+    const [showSEO, setShowSEO] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -951,6 +956,13 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                     >
                         <Search size={16} />
                     </button>
+                    <button
+                        className={`footer-btn ${showSEO ? 'active' : ''}`}
+                        onClick={() => setShowSEO(true)}
+                        title="SEO Dashboard"
+                    >
+                        <BarChart2 size={16} />
+                    </button>
                 </div>
             </div>
 
@@ -1033,6 +1045,16 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* SEO Dashboard Modal */}
+            {showSEO && (
+                <SEODashboard
+                    editor={editor}
+                    title={title}
+                    description={description}
+                    onClose={() => setShowSEO(false)}
+                />
             )}
         </div>
     );
