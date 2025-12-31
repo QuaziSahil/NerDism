@@ -9,19 +9,29 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import { Extension } from '@tiptap/core';
+import { Extension, Node } from '@tiptap/core';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
 import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     Heading1, Heading2, Heading3, List, ListOrdered,
     Quote, Code, Link as LinkIcon, Image as ImageIcon,
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Undo, Redo, Minus, Palette, Highlighter, Type,
-    ChevronDown, CaseSensitive, Keyboard, Search, X, Check, Save
+    ChevronDown, CaseSensitive, Keyboard, Search, X, Check, Save,
+    Table as TableIcon, PlusCircle, Trash2, Info, AlertTriangle, Lightbulb, FileCode
 } from 'lucide-react';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
 import './RichTextEditor.css';
+
+// Create lowlight instance for syntax highlighting
+const lowlight = createLowlight(common);
 
 const MenuButton = ({ onClick, isActive, disabled, title, children }) => (
     <button
@@ -128,6 +138,10 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
     const [isSaving, setIsSaving] = useState(false);
     const autoSaveTimerRef = useRef(null);
 
+    // Phase 2: New State
+    const [showTableMenu, setShowTableMenu] = useState(false);
+    const [showCalloutMenu, setShowCalloutMenu] = useState(false);
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -153,6 +167,17 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                 multicolor: true,
             }),
             FontSize,
+            // Phase 2: Table Extensions
+            Table.configure({
+                resizable: true,
+            }),
+            TableRow,
+            TableCell,
+            TableHeader,
+            // Phase 2: Code Block with Syntax Highlighting
+            CodeBlockLowlight.configure({
+                lowlight,
+            }),
         ],
         content: content || '',
         onUpdate: ({ editor }) => {
@@ -228,6 +253,8 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         setShowHighlightPicker(false);
         setShowFontSize(false);
         setShowFontFamily(false);
+        setShowTableMenu(false);
+        setShowCalloutMenu(false);
     };
 
     // Word and Character Count
@@ -652,6 +679,142 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                         accept="image/*"
                         style={{ display: 'none' }}
                     />
+
+                    {/* Table Dropdown */}
+                    <div className="dropdown-wrapper">
+                        <MenuButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowTableMenu(!showTableMenu);
+                                setShowCalloutMenu(false);
+                            }}
+                            isActive={editor.isActive('table')}
+                            title="Insert Table"
+                        >
+                            <TableIcon size={16} />
+                            <ChevronDown size={12} />
+                        </MenuButton>
+                        {showTableMenu && (
+                            <div className="color-dropdown table-dropdown">
+                                <div className="dropdown-title">Table Options</div>
+                                <button
+                                    className="dropdown-btn"
+                                    onClick={() => {
+                                        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                                        setShowTableMenu(false);
+                                    }}
+                                >
+                                    <PlusCircle size={14} /> Insert 3×3 Table
+                                </button>
+                                {editor.isActive('table') && (
+                                    <>
+                                        <div className="dropdown-divider" />
+                                        <button
+                                            className="dropdown-btn"
+                                            onClick={() => {
+                                                editor.chain().focus().addRowAfter().run();
+                                                setShowTableMenu(false);
+                                            }}
+                                        >
+                                            Add Row Below
+                                        </button>
+                                        <button
+                                            className="dropdown-btn"
+                                            onClick={() => {
+                                                editor.chain().focus().addColumnAfter().run();
+                                                setShowTableMenu(false);
+                                            }}
+                                        >
+                                            Add Column Right
+                                        </button>
+                                        <button
+                                            className="dropdown-btn danger"
+                                            onClick={() => {
+                                                editor.chain().focus().deleteRow().run();
+                                                setShowTableMenu(false);
+                                            }}
+                                        >
+                                            <Trash2 size={14} /> Delete Row
+                                        </button>
+                                        <button
+                                            className="dropdown-btn danger"
+                                            onClick={() => {
+                                                editor.chain().focus().deleteColumn().run();
+                                                setShowTableMenu(false);
+                                            }}
+                                        >
+                                            <Trash2 size={14} /> Delete Column
+                                        </button>
+                                        <button
+                                            className="dropdown-btn danger"
+                                            onClick={() => {
+                                                editor.chain().focus().deleteTable().run();
+                                                setShowTableMenu(false);
+                                            }}
+                                        >
+                                            <Trash2 size={14} /> Delete Table
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Callout Dropdown */}
+                    <div className="dropdown-wrapper">
+                        <MenuButton
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCalloutMenu(!showCalloutMenu);
+                                setShowTableMenu(false);
+                            }}
+                            title="Insert Callout Box"
+                        >
+                            <Info size={16} />
+                            <ChevronDown size={12} />
+                        </MenuButton>
+                        {showCalloutMenu && (
+                            <div className="color-dropdown callout-dropdown">
+                                <div className="dropdown-title">Callout Boxes</div>
+                                <button
+                                    className="dropdown-btn callout-info"
+                                    onClick={() => {
+                                        editor.chain().focus().insertContent('<blockquote class="callout callout-info"><p>ℹ️ <strong>Info:</strong> Your information here...</p></blockquote>').run();
+                                        setShowCalloutMenu(false);
+                                    }}
+                                >
+                                    <Info size={14} /> Info Box
+                                </button>
+                                <button
+                                    className="dropdown-btn callout-warning"
+                                    onClick={() => {
+                                        editor.chain().focus().insertContent('<blockquote class="callout callout-warning"><p>⚠️ <strong>Warning:</strong> Your warning here...</p></blockquote>').run();
+                                        setShowCalloutMenu(false);
+                                    }}
+                                >
+                                    <AlertTriangle size={14} /> Warning Box
+                                </button>
+                                <button
+                                    className="dropdown-btn callout-tip"
+                                    onClick={() => {
+                                        editor.chain().focus().insertContent('<blockquote class="callout callout-tip"><p>💡 <strong>Tip:</strong> Your tip here...</p></blockquote>').run();
+                                        setShowCalloutMenu(false);
+                                    }}
+                                >
+                                    <Lightbulb size={14} /> Tip Box
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Code Block Button */}
+                    <MenuButton
+                        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                        isActive={editor.isActive('codeBlock')}
+                        title="Code Block"
+                    >
+                        <FileCode size={16} />
+                    </MenuButton>
                 </div>
 
                 <div className="toolbar-divider" />
