@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://nerdism.in/sitemap.xml
+
+# Disallow admin routes
+Disallow: /admin/

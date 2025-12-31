@@ -1,0 +1,56 @@
+.share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 40px;
+}
+
+.share-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.share-icons {
+    display: flex;
+    gap: 8px;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.share-btn:hover {
+    background: var(--hover-color, var(--accent-primary));
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+.share-btn.copy-btn.copied {
+    background: #22c55e;
+    color: white;
+    border-color: transparent;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .share-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
