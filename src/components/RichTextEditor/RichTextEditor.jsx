@@ -206,6 +206,13 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         },
     });
 
+    // Fix: Sync editor content when prop changes (e.g. Clear Draft)
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content);
+        }
+    }, [content, editor]);
+
     const addLink = useCallback(() => {
         const url = prompt('Enter URL:');
         if (url) {
