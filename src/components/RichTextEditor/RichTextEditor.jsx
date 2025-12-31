@@ -16,9 +16,9 @@ import {
     Quote, Code, Link as LinkIcon, Image as ImageIcon,
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Undo, Redo, Minus, Palette, Highlighter, Type,
-    ChevronDown, CaseSensitive
+    ChevronDown, CaseSensitive, Keyboard, Search, X, Check, Save
 } from 'lucide-react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
 import './RichTextEditor.css';
@@ -113,11 +113,20 @@ const FONTS = [
     { name: 'Lobster', value: 'Lobster, cursive' },
 ];
 
-const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpiece here..." }) => {
+const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpiece here...", onAutoSave }) => {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showHighlightPicker, setShowHighlightPicker] = useState(false);
     const [showFontSize, setShowFontSize] = useState(false);
     const [showFontFamily, setShowFontFamily] = useState(false);
+
+    // Phase 1: New State
+    const [showShortcuts, setShowShortcuts] = useState(false);
+    const [showFindReplace, setShowFindReplace] = useState(false);
+    const [findText, setFindText] = useState('');
+    const [replaceText, setReplaceText] = useState('');
+    const [lastSaved, setLastSaved] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const autoSaveTimerRef = useRef(null);
 
     const editor = useEditor({
         extensions: [
@@ -220,6 +229,88 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         setShowFontSize(false);
         setShowFontFamily(false);
     };
+
+    // Word and Character Count
+    const wordCount = useMemo(() => {
+        if (!editor) return { words: 0, chars: 0, charsNoSpaces: 0 };
+        const text = editor.getText();
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        const charsNoSpaces = text.replace(/\s/g, '').length;
+        return { words, chars, charsNoSpaces };
+    }, [editor?.getText()]);
+
+    // Auto-save effect (every 30 seconds)
+    useEffect(() => {
+        if (!editor || !onAutoSave) return;
+
+        // Clear existing timer
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+        }
+
+        // Set new timer
+        autoSaveTimerRef.current = setTimeout(async () => {
+            setIsSaving(true);
+            try {
+                await onAutoSave(editor.getHTML());
+                setLastSaved(new Date());
+            } catch (error) {
+                console.error('Auto-save failed:', error);
+            } finally {
+                setIsSaving(false);
+            }
+        }, 30000); // 30 seconds
+
+        return () => {
+            if (autoSaveTimerRef.current) {
+                clearTimeout(autoSaveTimerRef.current);
+            }
+        };
+    }, [editor?.getHTML(), onAutoSave]);
+
+    // Keyboard shortcuts listener
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ctrl+/ or Cmd+/ for shortcuts panel
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                setShowShortcuts(prev => !prev);
+            }
+            // Ctrl+F or Cmd+F for find
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                setShowFindReplace(true);
+            }
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                setShowShortcuts(false);
+                setShowFindReplace(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Find in editor
+    const handleFind = useCallback(() => {
+        if (!editor || !findText) return;
+        // Use browser's find - TipTap doesn't have built-in search
+        if (window.find) {
+            window.find(findText);
+        }
+    }, [editor, findText]);
+
+    // Replace in editor
+    const handleReplace = useCallback(() => {
+        if (!editor || !findText) return;
+        const content = editor.getHTML();
+        const newContent = content.replace(new RegExp(findText, 'g'), replaceText);
+        editor.commands.setContent(newContent);
+        onChange(newContent);
+        setShowFindReplace(false);
+    }, [editor, findText, replaceText, onChange]);
 
     if (!editor) {
         return <div className="rich-text-editor">Loading editor...</div>;
@@ -586,6 +677,128 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
 
             {/* Editor Content */}
             <EditorContent editor={editor} className="editor-content-wrapper" />
+
+            {/* Editor Footer - Word Count & Status */}
+            <div className="editor-footer">
+                <div className="footer-stats">
+                    <span className="stat-item">
+                        <strong>{wordCount.words}</strong> words
+                    </span>
+                    <span className="stat-item">
+                        <strong>{wordCount.chars}</strong> chars
+                    </span>
+                    <span className="stat-item muted">
+                        ~{Math.ceil(wordCount.words / 200)} min read
+                    </span>
+                </div>
+                <div className="footer-actions">
+                    {isSaving && (
+                        <span className="save-indicator saving">
+                            <Save size={14} /> Saving...
+                        </span>
+                    )}
+                    {lastSaved && !isSaving && (
+                        <span className="save-indicator saved">
+                            <Check size={14} /> Saved {lastSaved.toLocaleTimeString()}
+                        </span>
+                    )}
+                    <button
+                        className="footer-btn"
+                        onClick={() => setShowShortcuts(true)}
+                        title="Keyboard Shortcuts (Ctrl+/)"
+                    >
+                        <Keyboard size={16} />
+                    </button>
+                    <button
+                        className="footer-btn"
+                        onClick={() => setShowFindReplace(true)}
+                        title="Find & Replace (Ctrl+F)"
+                    >
+                        <Search size={16} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Keyboard Shortcuts Modal */}
+            {showShortcuts && (
+                <div className="editor-modal-overlay" onClick={() => setShowShortcuts(false)}>
+                    <div className="editor-modal shortcuts-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3><Keyboard size={20} /> Keyboard Shortcuts</h3>
+                            <button className="modal-close" onClick={() => setShowShortcuts(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="shortcuts-grid">
+                            <div className="shortcut-group">
+                                <h4>Text Formatting</h4>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>B</kbd> Bold</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>I</kbd> Italic</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>U</kbd> Underline</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> Strikethrough</div>
+                            </div>
+                            <div className="shortcut-group">
+                                <h4>Structure</h4>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd> Heading 1</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>2</kbd> Heading 2</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>3</kbd> Heading 3</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> Numbered List</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> Bullet List</div>
+                            </div>
+                            <div className="shortcut-group">
+                                <h4>Actions</h4>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>F</kbd> Find</div>
+                                <div className="shortcut-item"><kbd>Ctrl</kbd>+<kbd>/</kbd> This Panel</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Find & Replace Modal */}
+            {showFindReplace && (
+                <div className="editor-modal-overlay" onClick={() => setShowFindReplace(false)}>
+                    <div className="editor-modal find-replace-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3><Search size={20} /> Find & Replace</h3>
+                            <button className="modal-close" onClick={() => setShowFindReplace(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="find-replace-inputs">
+                            <div className="input-group">
+                                <label>Find</label>
+                                <input
+                                    type="text"
+                                    value={findText}
+                                    onChange={e => setFindText(e.target.value)}
+                                    placeholder="Search text..."
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>Replace with</label>
+                                <input
+                                    type="text"
+                                    value={replaceText}
+                                    onChange={e => setReplaceText(e.target.value)}
+                                    placeholder="Replacement text..."
+                                />
+                            </div>
+                        </div>
+                        <div className="find-replace-actions">
+                            <button className="btn-find" onClick={handleFind}>
+                                <Search size={16} /> Find Next
+                            </button>
+                            <button className="btn-replace" onClick={handleReplace} disabled={!findText}>
+                                Replace All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
