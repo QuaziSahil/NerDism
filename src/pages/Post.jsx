@@ -205,7 +205,7 @@ const Post = () => {
             </div>
 
             {/* Post Content */}
-            <div className="container post-container">
+            <div className="post-container">
                 {/* Main Content - FIRST (left side) */}
                 <div className="post-content-body">
                     {post.excerpt && <p className="lead-paragraph">{post.excerpt}</p>}
