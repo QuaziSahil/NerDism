@@ -206,27 +206,7 @@ const Post = () => {
 
             {/* Post Content */}
             <div className="container post-container">
-                {/* Sidebar */}
-                <aside className="post-sidebar">
-                    <div className="sticky-sidebar">
-                        <div className="share-buttons">
-                            <button className="share-btn twitter" onClick={() => handleShare('twitter')} title="Share on Twitter">
-                                <Twitter size={20} />
-                            </button>
-                            <button className="share-btn facebook" onClick={() => handleShare('facebook')} title="Share on Facebook">
-                                <Facebook size={20} />
-                            </button>
-                            <button className="share-btn linkedin" onClick={() => handleShare('linkedin')} title="Share on LinkedIn">
-                                <Linkedin size={20} />
-                            </button>
-                            <button className="share-btn native" onClick={() => handleShare('native')} title="Share">
-                                <Share2 size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </aside>
-
-                {/* Main Content */}
+                {/* Main Content - FIRST (left side) */}
                 <div className="post-content-body">
                     {post.excerpt && <p className="lead-paragraph">{post.excerpt}</p>}
 
@@ -269,6 +249,26 @@ const Post = () => {
                     {/* Comments Section */}
                     {post && <Comments postId={post.id} />}
                 </div>
+
+                {/* Sidebar with Share Buttons - SECOND (right side) */}
+                <aside className="post-sidebar">
+                    <div className="sticky-sidebar">
+                        <div className="share-buttons">
+                            <button className="share-btn twitter" onClick={() => handleShare('twitter')} title="Share on Twitter">
+                                <Twitter size={20} />
+                            </button>
+                            <button className="share-btn facebook" onClick={() => handleShare('facebook')} title="Share on Facebook">
+                                <Facebook size={20} />
+                            </button>
+                            <button className="share-btn linkedin" onClick={() => handleShare('linkedin')} title="Share on LinkedIn">
+                                <Linkedin size={20} />
+                            </button>
+                            <button className="share-btn native" onClick={() => handleShare('native')} title="Share">
+                                <Share2 size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </aside>
             </div>
         </article>
     );
