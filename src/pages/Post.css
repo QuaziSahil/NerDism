@@ -416,26 +416,28 @@
 /* ========== LARGE SCREENS ========== */
 @media (min-width: 1024px) {
     .post-container {
-        display: flex;
-        gap: 60px;
-        max-width: 1000px;
+        max-width: 720px;
         padding: 64px 32px;
+        position: relative;
     }
 
     .post-content-body {
-        flex: 1;
-        max-width: 680px;
+        max-width: 100%;
     }
 
+    /* Sidebar floats to the right, not in flow */
     .post-sidebar {
         display: block;
+        position: fixed;
+        right: calc((100vw - 720px) / 2 - 100px);
+        top: 50%;
+        transform: translateY(-50%);
         width: 60px;
-        flex-shrink: 0;
+        z-index: 100;
     }
 
     .sticky-sidebar {
-        position: sticky;
-        top: 100px;
+        position: static;
     }
 
     .share-buttons {
@@ -445,8 +447,8 @@
     }
 
     .share-btn {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         border: 1px solid var(--border-color);
         background: var(--bg-secondary);
@@ -455,14 +457,16 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .share-btn:hover {
         background: var(--accent-primary, #d946a8);
         border-color: var(--accent-primary, #d946a8);
         color: #fff;
-        transform: scale(1.1);
+        transform: scale(1.15);
+        box-shadow: 0 6px 20px rgba(217, 70, 168, 0.4);
     }
 
     /* Images - Larger Breakout */
