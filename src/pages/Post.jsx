@@ -93,14 +93,40 @@ const Post = () => {
             .replace(/\n/g, '<br/>');
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
+    const formatDate = (dateValue) => {
+        if (!dateValue) return '';
+        // Handle Firebase Timestamp objects
+        let date;
+        if (dateValue?.seconds) {
+            date = new Date(dateValue.seconds * 1000);
+        } else if (dateValue?.toDate) {
+            date = dateValue.toDate();
+        } else {
+            date = new Date(dateValue);
+        }
+        if (isNaN(date.getTime())) return '';
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    // Share handlers
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareTitle = post?.title || 'Check out this article';
+
+    const handleShare = (platform) => {
+        const urls = {
+            twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`,
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+        };
+        if (platform === 'native' && navigator.share) {
+            navigator.share({ title: shareTitle, url: shareUrl });
+        } else if (urls[platform]) {
+            window.open(urls[platform], '_blank', 'width=600,height=400');
+        }
     };
 
     return (
@@ -182,19 +208,18 @@ const Post = () => {
             <div className="container post-container">
                 {/* Sidebar */}
                 <aside className="post-sidebar">
-                    <TableOfContents content={post.content} />
                     <div className="sticky-sidebar">
                         <div className="share-buttons">
-                            <button className="share-btn twitter">
+                            <button className="share-btn twitter" onClick={() => handleShare('twitter')} title="Share on Twitter">
                                 <Twitter size={20} />
                             </button>
-                            <button className="share-btn facebook">
+                            <button className="share-btn facebook" onClick={() => handleShare('facebook')} title="Share on Facebook">
                                 <Facebook size={20} />
                             </button>
-                            <button className="share-btn linkedin">
+                            <button className="share-btn linkedin" onClick={() => handleShare('linkedin')} title="Share on LinkedIn">
                                 <Linkedin size={20} />
                             </button>
-                            <button className="share-btn native">
+                            <button className="share-btn native" onClick={() => handleShare('native')} title="Share">
                                 <Share2 size={20} />
                             </button>
                         </div>

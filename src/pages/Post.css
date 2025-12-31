@@ -191,15 +191,16 @@
 /* Post Layout */
 .post-container {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 1fr 80px;
     gap: 40px;
     max-width: 900px;
-    /* Reading width */
     margin: 0 auto;
     padding: 0 20px;
 }
 
 .post-sidebar {
+    order: 2;
+    /* Move sidebar to right */
     padding-top: 8px;
     z-index: 10;
 }
