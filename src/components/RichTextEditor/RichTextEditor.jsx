@@ -18,7 +18,9 @@ import {
     Undo, Redo, Minus, Palette, Highlighter, Type,
     ChevronDown, CaseSensitive
 } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../firebase';
 import './RichTextEditor.css';
 
 const MenuButton = ({ onClick, isActive, disabled, title, children }) => (
@@ -161,12 +163,55 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         }
     }, [editor]);
 
-    const addImage = useCallback(() => {
-        const url = prompt('Enter image URL:');
-        if (url) {
+    // Hidden file input ref for image upload
+    const imageInputRef = useRef(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+    // Handle image file upload to Firebase Storage
+    const handleImageUpload = useCallback(async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size must be less than 5MB');
+            return;
+        }
+
+        setIsUploadingImage(true);
+        try {
+            // Create unique filename
+            const timestamp = Date.now();
+            const fileName = `inline-images/${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const storageRef = ref(storage, fileName);
+
+            // Upload to Firebase Storage
+            await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(storageRef);
+
+            // Insert image into editor
             editor?.chain().focus().setImage({ src: url }).run();
+        } catch (error) {
+            console.error('Image upload error:', error);
+            alert('Failed to upload image. Please try again.');
+        } finally {
+            setIsUploadingImage(false);
+            // Reset input for same file re-upload
+            if (imageInputRef.current) {
+                imageInputRef.current.value = '';
+            }
         }
     }, [editor]);
+
+    const triggerImageUpload = () => {
+        imageInputRef.current?.click();
+    };
 
     // Close dropdowns when clicking outside
     const closeDropdowns = () => {
@@ -233,6 +278,13 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                         title="Heading 2"
                     >
                         <Heading2 size={16} />
+                    </MenuButton>
+                    <MenuButton
+                        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                        isActive={editor.isActive('heading', { level: 3 })}
+                        title="Heading 3"
+                    >
+                        <Heading3 size={16} />
                     </MenuButton>
 
                     {/* Font Family Dropdown */}
@@ -490,9 +542,25 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                     <MenuButton onClick={addLink} isActive={editor.isActive('link')} title="Insert Link">
                         <LinkIcon size={16} />
                     </MenuButton>
-                    <MenuButton onClick={addImage} title="Insert Image">
-                        <ImageIcon size={16} />
+                    <MenuButton
+                        onClick={triggerImageUpload}
+                        title="Insert Image from Device"
+                        disabled={isUploadingImage}
+                    >
+                        {isUploadingImage ? (
+                            <span className="upload-spinner">⏳</span>
+                        ) : (
+                            <ImageIcon size={16} />
+                        )}
                     </MenuButton>
+                    {/* Hidden file input for image upload */}
+                    <input
+                        type="file"
+                        ref={imageInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                    />
                 </div>
 
                 <div className="toolbar-divider" />
