@@ -9,13 +9,11 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import { Extension, Node } from '@tiptap/core';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { common, createLowlight } from 'lowlight';
+import { Extension } from '@tiptap/core';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
     Heading1, Heading2, Heading3, List, ListOrdered,
@@ -29,9 +27,6 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
 import './RichTextEditor.css';
-
-// Create lowlight instance for syntax highlighting
-const lowlight = createLowlight(common);
 
 const MenuButton = ({ onClick, isActive, disabled, title, children }) => (
     <button
@@ -174,10 +169,6 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
             TableRow,
             TableCell,
             TableHeader,
-            // Phase 2: Code Block with Syntax Highlighting
-            CodeBlockLowlight.configure({
-                lowlight,
-            }),
         ],
         content: content || '',
         onUpdate: ({ editor }) => {

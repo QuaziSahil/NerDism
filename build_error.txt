@@ -1,0 +1,132 @@
+﻿[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 2257 modules transformed.
+node.exe : 
+[31mÔ£ù[39m Build 
+failed in 3.39s
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mÔ£   
+ ù[39m Build fai    
+led in 3.39s:Str    
+ing) [], RemoteE    
+xception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31msrc/components/R
+ichTextEditor/RichTex
+tEditor.jsx (13:7): 
+"default" is not 
+exported by "node_mod
+ules/@tiptap/extensio
+n-table/dist/index.js
+", imported by "src/c
+omponents/RichTextEdi
+tor/RichTextEditor.js
+x".[31m
+file: [36mC:/Users/r
+ehan/New Apps/NerDism
+/src/components/RichT
+extEditor/RichTextEdi
+tor.jsx:13:7[31m
+[33m
+11: import { 
+Highlight } from '@ti
+ptap/extension-highli
+ght';
+12: import { 
+Extension } from 
+'@tiptap/core';
+13: import Table 
+from '@tiptap/extensi
+on-table';
+           ^
+14: import TableRow 
+from '@tiptap/extensi
+on-table-row';
+15: import TableCell 
+from '@tiptap/extensi
+on-table-cell';
+[31m
+    at 
+getRollupError (file:
+///C:/Users/rehan/New
+%20Apps/NerDism/node_
+modules/rollup/dist/e
+s/shared/parseAst.js:
+401:41)
+    at error (file://
+/C:/Users/rehan/New%2
+0Apps/NerDism/node_mo
+dules/rollup/dist/es/
+shared/parseAst.js:39
+7:42)
+    at Module.error (
+file:///C:/Users/reha
+n/New%20Apps/NerDism/
+node_modules/rollup/d
+ist/es/shared/node-en
+try.js:17022:16)
+    at 
+Module.traceVariable 
+(file:///C:/Users/reh
+an/New%20Apps/NerDism
+/node_modules/rollup/
+dist/es/shared/node-e
+ntry.js:17478:29)
+    at ModuleScope.fi
+ndVariable (file:///C
+:/Users/rehan/New%20A
+pps/NerDism/node_modu
+les/rollup/dist/es/sh
+ared/node-entry.js:15
+141:39)
+    at ReturnValueSco
+pe.findVariable (file
+:///C:/Users/rehan/Ne
+w%20Apps/NerDism/node
+_modules/rollup/dist/
+es/shared/node-entry.
+js:5688:38)
+    at FunctionBodySc
+ope.findVariable (fil
+e:///C:/Users/rehan/N
+ew%20Apps/NerDism/nod
+e_modules/rollup/dist
+/es/shared/node-entry
+.js:5688:38)
+    at MemberExpressi
+on.bind (file:///C:/U
+sers/rehan/New%20Apps
+/NerDism/node_modules
+/rollup/dist/es/share
+d/node-entry.js:7406:
+49)
+    at 
+CallExpression.bind (
+file:///C:/Users/reha
+n/New%20Apps/NerDism/
+node_modules/rollup/d
+ist/es/shared/node-en
+try.js:2829:23)
+    at 
+CallExpression.bind (
+file:///C:/Users/reha
+n/New%20Apps/NerDism/
+node_modules/rollup/d
+ist/es/shared/node-en
+try.js:12172:15)[39m
