@@ -188,19 +188,26 @@
     gap: 8px;
 }
 
-/* Post Layout - FIXED: Content centered, sidebar on right */
+/* Post Layout - Using Flexbox for reliable centering */
 .post-container {
-    display: grid !important;
-    grid-template-columns: 1fr 80px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
     gap: 40px !important;
     max-width: 900px !important;
     margin: 0 auto !important;
     padding: 0 20px !important;
 }
 
+.post-content-body {
+    flex: 1 !important;
+    max-width: 720px !important;
+    min-width: 0 !important;
+}
+
 .post-sidebar {
-    order: 2;
-    /* Move sidebar to right */
+    flex-shrink: 0 !important;
+    width: 60px !important;
     padding-top: 8px;
     z-index: 10;
 }
