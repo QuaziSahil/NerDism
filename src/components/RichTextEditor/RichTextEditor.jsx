@@ -30,6 +30,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
 import { getSlashCommandExtension } from './slashCommand';
 import { CustomHeading } from './CustomHeading';
+import { Column, Columns } from './extensions/ColumnExtension';
+import { Details, Summary, DetailsContent } from './extensions/CollapsibleExtension';
 import 'tippy.js/dist/tippy.css';
 import './RichTextEditor.css';
 
@@ -184,6 +186,9 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
             }),
             // Phase 4: Slash Commands
             getSlashCommandExtension(),
+            // Phase 5: Layout Features
+            Column, Columns,
+            Details, Summary, DetailsContent,
         ],
         content: content || '',
         onUpdate: ({ editor }) => {

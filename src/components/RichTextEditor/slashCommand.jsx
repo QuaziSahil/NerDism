@@ -6,7 +6,8 @@ import tippy from 'tippy.js';
 import { CommandList } from './CommandList';
 import {
     Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare,
-    Quote, Code, Table, Minus, Image, Youtube, Twitter, Info, Type
+    Quote, Code, Table, Minus, Image, Youtube, Twitter, Info, Type,
+    Layout, ChevronRight
 } from 'lucide-react';
 
 const getSuggestionItems = ({ query }) => {
@@ -96,6 +97,20 @@ const getSuggestionItems = ({ query }) => {
                 if (url) {
                     editor.chain().focus().deleteRange(range).setYoutubeVideo({ src: url }).run();
                 }
+            },
+        },
+        {
+            title: 'Columns',
+            icon: <Layout size={18} />,
+            command: ({ editor, range }) => {
+                editor.chain().focus().deleteRange(range).insertColumns().run();
+            },
+        },
+        {
+            title: 'Collapsible',
+            icon: <ChevronRight size={18} />,
+            command: ({ editor, range }) => {
+                editor.chain().focus().deleteRange(range).setDetails().run();
             },
         },
     ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase()));

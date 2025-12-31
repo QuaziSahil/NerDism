@@ -943,3 +943,65 @@ kbd {
     text-align: center;
     font-style: italic;
 }
+
+/* ========== Layout Features ========== */
+/* Columns */
+.editor-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.editor-column {
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    min-height: 50px;
+}
+
+.editor-column:focus-within {
+    border-color: var(--accent-color);
+    border-style: solid;
+}
+
+/* Collapsible Sections */
+.editor-details {
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.editor-summary {
+    display: list-item;
+    /* Defaults to marker, can be flex */
+    padding: 12px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    user-select: none;
+    outline: none;
+}
+
+.editor-summary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.details-content {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-primary);
+}
+
+/* Placeholder for empty blocks */
+.editor-column p.is-editor-empty:first-child::before,
+.details-content p.is-editor-empty:first-child::before {
+    content: 'Type here...';
+    color: var(--text-secondary);
+    opacity: 0.5;
+    pointer-events: none;
+    float: left;
+    height: 0;
+}
