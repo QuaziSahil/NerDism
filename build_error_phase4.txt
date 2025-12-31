@@ -1,0 +1,98 @@
+﻿[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 2026 modules transformed.
+node.exe : 
+[31mÔ£ù[39m Build 
+failed in 2.68s
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mÔ£   
+ ù[39m Build fai    
+led in 2.68s:Str    
+ing) [], RemoteE    
+xception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31msrc/components/R
+ichTextEditor/slashCo
+mmand.js (15:18): 
+Expression 
+expected[31m
+file: [36mC:/Users/r
+ehan/New Apps/NerDism
+/src/components/RichT
+extEditor/slashComman
+d.js:15:18[31m
+[33m
+13:         {
+14:             
+title: 'Paragraph',
+15:             
+icon: <Type 
+size={18} />,
+                     
+ ^
+16:             
+command: ({ editor, 
+range }) => {
+17:                 e
+ditor.chain().focus()
+.deleteRange(range).s
+etParagraph().run();
+[31m
+    at 
+getRollupError (file:
+///C:/Users/rehan/New
+%20Apps/NerDism/node_
+modules/rollup/dist/e
+s/shared/parseAst.js:
+401:41)
+    at ParseError.ini
+tialise (file:///C:/U
+sers/rehan/New%20Apps
+/NerDism/node_modules
+/rollup/dist/es/share
+d/node-entry.js:14534
+:28)
+    at convertNode (f
+ile:///C:/Users/rehan
+/New%20Apps/NerDism/n
+ode_modules/rollup/di
+st/es/shared/node-ent
+ry.js:16418:10)
+    at 
+convertProgram (file:
+///C:/Users/rehan/New
+%20Apps/NerDism/node_
+modules/rollup/dist/e
+s/shared/node-entry.j
+s:15658:12)
+    at 
+Module.setSource (fil
+e:///C:/Users/rehan/N
+ew%20Apps/NerDism/nod
+e_modules/rollup/dist
+/es/shared/node-entry
+.js:17418:24)
+    at async ModuleLo
+ader.addModuleSource 
+(file:///C:/Users/reh
+an/New%20Apps/NerDism
+/node_modules/rollup/
+dist/es/shared/node-e
+ntry.js:21448:13)[39
+m

@@ -28,6 +28,7 @@
     "@tiptap/extension-youtube": "^3.14.0",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
+    "@tiptap/suggestion": "^3.14.0",
     "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
     "lowlight": "^3.3.0",
@@ -36,7 +37,8 @@
     "react-dom": "^19.2.0",
     "react-helmet-async": "^2.0.5",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.11.0"
+    "react-router-dom": "^7.11.0",
+    "tippy.js": "^6.3.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

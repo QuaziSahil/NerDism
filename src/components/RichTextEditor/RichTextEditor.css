@@ -890,3 +890,56 @@ kbd {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========== Slash Command Menu ========== */
+.slash-command-menu {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0.2rem;
+    min-width: 250px;
+    z-index: 1000;
+}
+
+.slash-command-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.1s;
+}
+
+.slash-command-item:hover,
+.slash-command-item.is-selected {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-color);
+}
+
+.slash-command-item .slash-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.slash-command-item.is-selected .slash-icon {
+    color: var(--accent-color);
+}
+
+.slash-command-empty {
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    font-style: italic;
+}

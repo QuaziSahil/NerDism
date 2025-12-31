@@ -28,6 +28,9 @@ import {
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../firebase';
+import { getSlashCommandExtension } from './slashCommand';
+import { CustomHeading } from './CustomHeading';
+import 'tippy.js/dist/tippy.css';
 import './RichTextEditor.css';
 
 const MenuButton = ({ onClick, isActive, disabled, title, children }) => (
@@ -145,9 +148,10 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
-                heading: {
-                    levels: [1, 2, 3],
-                },
+                heading: false, // Disable default heading to use CustomHeading
+            }),
+            CustomHeading.configure({
+                levels: [1, 2, 3],
             }),
             Underline,
             Link.configure({
@@ -178,6 +182,8 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
             Youtube.configure({
                 controls: false,
             }),
+            // Phase 4: Slash Commands
+            getSlashCommandExtension(),
         ],
         content: content || '',
         onUpdate: ({ editor }) => {
