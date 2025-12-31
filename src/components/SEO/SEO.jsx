@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 const SEO = ({ title, description, image, url, type = 'article', publishDate, modifiedDate }) => {
     const siteTitle = 'NerDism - The Modern Nerd';
     const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
-    const siteUrl = 'https://nerdism.me'; // Your domain
+    const siteUrl = 'https://ner-dism.vercel.app'; // Your domain
     const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
     const metaDescription = description || 'Minimalist design, insane animations, and everything a nerd loves. Explorations in tech, gaming, and code.';
     const metaImage = image || `${siteUrl}/logo.png`;

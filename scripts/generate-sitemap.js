@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 // You'll need to set up a service account for this
 // For now, we'll create a static sitemap with dynamic routes
 
-const SITE_URL = 'https://nerdism.in';
+const SITE_URL = 'https://ner-dism.vercel.app';
 
 const staticPages = [
     { url: '/', priority: '1.0', changefreq: 'daily' },
