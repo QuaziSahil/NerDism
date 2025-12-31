@@ -190,13 +190,12 @@
 
 /* Post Layout - FIXED: Content centered, sidebar on right */
 .post-container {
-    display: grid;
-    grid-template-columns: 1fr 80px;
-    /* Content takes remaining space, sidebar 80px */
-    gap: 40px;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 20px;
+    display: grid !important;
+    grid-template-columns: 1fr 80px !important;
+    gap: 40px !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
 }
 
 .post-sidebar {
