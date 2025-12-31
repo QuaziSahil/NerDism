@@ -12,6 +12,7 @@ import ImageUploader from '../../components/ImageUploader/ImageUploader';
 import PostPreview from '../../components/PostPreview/PostPreview';
 import SocialPreview from '../../components/SocialPreview/SocialPreview';
 import RichTextEditor from '../../components/RichTextEditor/RichTextEditor';
+import { CATEGORIES } from '../../constants/categories';
 import './Editor.css';
 
 const Editor = () => {
@@ -33,7 +34,8 @@ const Editor = () => {
     const [lastSaved, setLastSaved] = useState(null);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false); // Track manual edits
 
-    const categories = ['Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
+    // Categories now imported
+
 
     // Helper to generate slug
     const generateSlug = (text) => {
@@ -275,7 +277,7 @@ const Editor = () => {
                         <div className="form-group">
                             <label>Category</label>
                             <select name="category" value={post.category} onChange={handleChange}>
-                                {categories.map(cat => (
+                                {CATEGORIES.map(cat => (
                                     <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>

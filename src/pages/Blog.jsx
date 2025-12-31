@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Loader } from 'lucide-react';
 import PostCard from '../components/PostCard/PostCard';
 import { getPublishedPosts } from '../firebase';
+import { CATEGORIES } from '../constants/categories';
 import './Blog.css';
 
 const Blog = () => {
@@ -23,7 +24,7 @@ const Blog = () => {
     }, []);
 
     // Updated categories including Anime, Movies, AI
-    const categories = ['All', 'Tech', 'Gaming', 'Coding', 'Anime', 'Movies', 'AI'];
+    const filters = ['All', ...CATEGORIES];
 
     // Filter by category and search
     const filteredPosts = posts.filter(post => {
@@ -70,7 +71,7 @@ const Blog = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
                 >
-                    {categories.map((cat) => (
+                    {filters.map((cat) => (
                         <button
                             key={cat}
                             className={`filter-btn ${filter === cat ? 'active' : ''}`}
