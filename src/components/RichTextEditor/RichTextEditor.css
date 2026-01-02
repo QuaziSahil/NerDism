@@ -465,20 +465,25 @@
 }
 
 /* ========== Embeds ========== */
-/* YouTube */
+/* YouTube - Responsive Container */
 .rich-editor-content div[data-youtube-video] {
     cursor: move;
-    padding-right: 24px;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 1rem 0;
 }
 
 .rich-editor-content iframe {
+    display: block;
     width: 100%;
+    max-width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
     border-radius: 8px;
     border: none;
     background: #000;
-    margin: 1rem 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -868,6 +873,20 @@ kbd {
     .rich-editor-content {
         padding: 14px;
         font-size: 0.95rem;
+    }
+
+    /* YouTube embed mobile fix */
+    .rich-editor-content div[data-youtube-video] {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0.75rem 0;
+    }
+
+    .rich-editor-content iframe {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 6px;
     }
 
     .editor-footer {
