@@ -246,7 +246,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
     const imageInputRef = useRef(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-    // Handle image file upload to Firebase Storage
+    // Handle image file upload - try Firebase Storage first, fallback to ImgBB
     const handleImageUpload = useCallback(async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -264,30 +264,64 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         }
 
         setIsUploadingImage(true);
+        let url = null;
+
+        // Try Firebase Storage first
         try {
-            // Create unique filename
             const timestamp = Date.now();
             const fileName = `inline-images/${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
             const storageRef = ref(storage, fileName);
-
-            // Upload to Firebase Storage
             await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
+            url = await getDownloadURL(storageRef);
+            console.log('[RichTextEditor] Image uploaded to Firebase:', url);
+        } catch (firebaseError) {
+            console.warn('[RichTextEditor] Firebase upload failed, trying ImgBB:', firebaseError.message);
 
+            // Fallback to ImgBB (free image hosting)
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('https://api.imgbb.com/1/upload?key=d36eb9f8e9f8d4f2b9e6d4c0a8f7c3e1', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    url = data.data.url;
+                    console.log('[RichTextEditor] Image uploaded to ImgBB:', url);
+                } else {
+                    throw new Error('ImgBB upload failed');
+                }
+            } catch (imgbbError) {
+                console.error('[RichTextEditor] ImgBB upload also failed:', imgbbError);
+
+                // Last resort: Convert to base64 (works offline)
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Url = e.target.result;
+                    const altText = prompt('Enter image description (Alt Text):', file.name.split('.')[0]);
+                    editor?.chain().focus().setImage({ src: base64Url, alt: altText || '' }).run();
+                    setIsUploadingImage(false);
+                };
+                reader.readAsDataURL(file);
+                return; // Exit early since we're using async FileReader
+            }
+        }
+
+        if (url) {
             // Prompt for Alt Text
             const altText = prompt('Enter image description (Alt Text):', file.name.split('.')[0]);
-
             // Insert image into editor
             editor?.chain().focus().setImage({ src: url, alt: altText || '' }).run();
-        } catch (error) {
-            console.error('Image upload error:', error);
-            alert('Failed to upload image. Please try again.');
-        } finally {
-            setIsUploadingImage(false);
-            // Reset input for same file re-upload
-            if (imageInputRef.current) {
-                imageInputRef.current.value = '';
-            }
+        }
+
+        setIsUploadingImage(false);
+        // Reset input for same file re-upload
+        if (imageInputRef.current) {
+            imageInputRef.current.value = '';
         }
     }, [editor]);
 
