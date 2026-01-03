@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Twitter, Send, Check, ExternalLink, AlertCircle } from 'lucide-react';
+import { Mail, MapPin, Twitter, Send, Check, ExternalLink, AlertCircle, User } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
 
@@ -85,6 +85,18 @@ const Contact = () => {
                             >
                                 <Twitter className="icon" />
                                 <span>@OfficialNerDism</span>
+                                <ExternalLink size={14} className="external-icon" />
+                            </a>
+
+                            {/* Portfolio - Opens Sahil's Portfolio */}
+                            <a
+                                href="https://sahil-me.vercel.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="detail-item clickable"
+                            >
+                                <User className="icon" />
+                                <span>sahil-me.vercel.app</span>
                                 <ExternalLink size={14} className="external-icon" />
                             </a>
 
