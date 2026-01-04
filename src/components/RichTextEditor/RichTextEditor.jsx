@@ -240,6 +240,29 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
         }
     }, [editor]);
 
+    // Add image from URL
+    const addImageFromUrl = useCallback(() => {
+        const url = prompt('Enter image URL:');
+        if (url) {
+            // Validate URL format
+            if (!url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i) &&
+                !url.includes('imgur.com') &&
+                !url.includes('imgbb.com') &&
+                !url.includes('unsplash.com') &&
+                !url.includes('pexels.com') &&
+                !url.includes('images.') &&
+                !url.includes('/image')) {
+                // Still allow if user confirms
+                const proceed = confirm('This URL may not be a valid image. Do you want to proceed anyway?');
+                if (!proceed) return;
+            }
+
+            const altText = prompt('Enter image description (Alt Text):', 'Image');
+            editor?.chain().focus().setImage({ src: url, alt: altText || '' }).run();
+            setShowEmbedMenu(false);
+        }
+    }, [editor]);
+
     // Hidden file input ref for image upload
     const imageInputRef = useRef(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -908,6 +931,13 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your masterpie
                                     onClick={addTwitter}
                                 >
                                     <TwitterIcon size={14} /> Twitter / X
+                                </button>
+                                <div className="dropdown-divider" />
+                                <button
+                                    className="dropdown-btn"
+                                    onClick={addImageFromUrl}
+                                >
+                                    <ImageIcon size={14} /> Image from URL
                                 </button>
                             </div>
                         )}
