@@ -78,13 +78,13 @@ const Contact = () => {
 
                             {/* Twitter - Opens X profile */}
                             <a
-                                href="https://x.com/OfficialNerDism"
+                                href="https://x.com/NerDismme"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="detail-item clickable"
                             >
                                 <Twitter className="icon" />
-                                <span>@OfficialNerDism</span>
+                                <span>@NerDismme</span>
                                 <ExternalLink size={14} className="external-icon" />
                             </a>
 

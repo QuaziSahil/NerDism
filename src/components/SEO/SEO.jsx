@@ -53,7 +53,7 @@ const SEO = ({ title, description, image, url, type = 'article', publishDate, mo
 
             {/* Twitter */}
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:creator" content="@OfficialNerDism" />
+            <meta name="twitter:creator" content="@NerDismme" />
             <meta name="twitter:title" content={title || siteTitle} />
             <meta name="twitter:description" content={metaDescription} />
             <meta name="twitter:image" content={metaImage} />
