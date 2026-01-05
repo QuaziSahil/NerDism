@@ -1,13 +1,9 @@
 export const CATEGORIES = [
     'Tech',
     'Gaming',
-    'Coding',
+    'AI',
     'Anime',
     'Movies',
-    'AI',
     'Books',
-    'Reviews',
-    'Science',
-    'Gadgets',
-    'General'
+    'Reviews'
 ];
