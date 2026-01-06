@@ -5,5 +5,6 @@ export const CATEGORIES = [
     'Anime',
     'Movies',
     'Books',
-    'Reviews'
+    'Reviews',
+    'Sports'
 ];
