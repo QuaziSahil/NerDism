@@ -1,4 +1,5 @@
 export const CATEGORIES = [
+    'General',
     'Tech',
     'Gaming',
     'AI',
