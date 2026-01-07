@@ -222,7 +222,7 @@ const Post = () => {
                             {post.author?.avatar ? (
                                 <img src={post.author.avatar} alt={post.author.name} />
                             ) : (
-                                <User size={32} />
+                                <span className="author-initial">S</span>
                             )}
                         </div>
                         <div className="author-info">

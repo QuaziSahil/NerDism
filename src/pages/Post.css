@@ -318,28 +318,28 @@
     display: none;
 }
 
-/* ========== Author Box ========== */
+/* ========== Author Box - Premium Compact ========== */
 .author-box {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 24px;
-    margin-top: 64px;
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
+    gap: 16px;
+    padding: 16px 20px;
+    margin-top: 48px;
+    background: rgba(217, 70, 168, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(217, 70, 168, 0.15);
 }
 
 .author-avatar {
-    width: 64px;
-    height: 64px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
     border-radius: 50%;
     background: linear-gradient(135deg, #d946a8, #a855f7);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(217, 70, 168, 0.3);
 }
 
 .author-avatar img {
@@ -349,16 +349,25 @@
     object-fit: cover;
 }
 
-.author-info h4 {
-    margin: 0 0 6px;
+.author-initial {
+    color: #fff;
     font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.author-info h4 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .author-info p {
     margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
 }
 
 /* ========== Related Posts ========== */
