@@ -219,11 +219,7 @@ const Post = () => {
                     {/* Author Box */}
                     <div className="author-box">
                         <div className="author-avatar">
-                            {post.author?.avatar ? (
-                                <img src={post.author.avatar} alt={post.author.name} />
-                            ) : (
-                                <span className="author-initial">S</span>
-                            )}
+                            <span className="author-initial">S</span>
                         </div>
                         <div className="author-info">
                             <h4>Written by {post.author?.name || 'Sahil'}</h4>
