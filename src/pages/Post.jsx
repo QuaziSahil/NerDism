@@ -176,7 +176,7 @@ const Post = () => {
                     >
                         <div className="meta-group">
                             <User size={18} />
-                            <span>{post.author?.name || 'Sahil'}</span>
+                            <span>{post.author?.name || 'Nerdism'}</span>
                         </div>
                         <div className="meta-group">
                             <Calendar size={18} />
@@ -219,11 +219,11 @@ const Post = () => {
                     {/* Author Box */}
                     <div className="author-box">
                         <div className="author-avatar">
-                            <span className="author-initial">S</span>
+                            <span className="author-initial">N</span>
                         </div>
                         <div className="author-info">
-                            <h4>Written by {post.author?.name || 'Sahil'}</h4>
-                            <p>Technologist, gamer, and professional nerd. Exploring the intersection of code and culture.</p>
+                            <h4>Written by {post.author?.name || 'Nerdism'}</h4>
+                            <p>Nerdism – For the True Nerds. Exploring tech, gaming, and digital culture with unfiltered passion.</p>
                         </div>
                     </div>
 
