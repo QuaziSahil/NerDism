@@ -18,7 +18,7 @@ const SEO = ({ title, description, image, url, type = 'article', publishDate, mo
         "dateModified": modifiedDate || new Date().toISOString(),
         "author": [{
             "@type": "Person",
-            "name": "Sahil",
+            "name": "Nerdism",
             "url": "https://nerdism.me/about"
         }],
         "publisher": {

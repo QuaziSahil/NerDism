@@ -61,7 +61,7 @@ const PostPreview = ({ post, onClose }) => {
                             <div className="preview-meta">
                                 <div className="meta-item">
                                     <User size={16} />
-                                    <span>Sahil</span>
+                                    <span>Nerdism</span>
                                 </div>
                                 <div className="meta-item">
                                     <Calendar size={16} />
@@ -98,13 +98,13 @@ const PostPreview = ({ post, onClose }) => {
                         <div className="preview-author-box">
                             <div className="author-avatar">
                                 <img
-                                    src="https://ui-avatars.com/api/?name=Sahil&background=6366f1&color=fff&size=128"
-                                    alt="Sahil"
+                                    src="https://ui-avatars.com/api/?name=Nerdism&background=6366f1&color=fff&size=128"
+                                    alt="Nerdism"
                                 />
                             </div>
                             <div className="author-info">
-                                <h4>Written by Sahil</h4>
-                                <p>Technologist, gamer, and professional nerd. Exploring the intersection of code and culture.</p>
+                                <h4>Written by Nerdism</h4>
+                                <p>Nerdism – For the True Nerds. Exploring tech, gaming, and digital culture with unfiltered passion.</p>
                             </div>
                         </div>
                     </div>

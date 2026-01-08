@@ -84,8 +84,8 @@ export const addNewsletterSubscriber = async (email) => {
 
 // Default author info
 const DEFAULT_AUTHOR = {
-    name: 'Sahil',
-    avatar: 'https://ui-avatars.com/api/?name=Sahil&background=6366f1&color=fff&size=128'
+    name: 'Nerdism',
+    avatar: 'https://ui-avatars.com/api/?name=Nerdism&background=6366f1&color=fff&size=128'
 };
 
 /**
