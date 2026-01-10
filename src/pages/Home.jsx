@@ -108,7 +108,7 @@ const Home = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            <Link to={`/post/${featuredPost.slug}`} className="featured-link">
+                            <Link to={`/blog/${featuredPost.slug}`} className="featured-link">
                                 {featuredPost.image && (
                                     <div className="featured-image">
                                         <img src={featuredPost.image} alt={featuredPost.title} />

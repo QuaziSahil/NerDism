@@ -203,6 +203,8 @@
     grid-template-columns: 1fr 1.5fr;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
+    position: relative;
 }
 
 .featured-image {
