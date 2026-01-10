@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Loader } from 'lucide-react';
 import PostCard from '../components/PostCard/PostCard';
 import { getPublishedPosts } from '../firebase';
-import { CATEGORIES } from '../constants/categories';
 import './Blog.css';
 
 const Blog = () => {
@@ -23,8 +22,11 @@ const Blog = () => {
         fetchPosts();
     }, []);
 
-    // Updated categories including Anime, Movies, AI
-    const filters = ['All', ...CATEGORIES];
+    // Only show categories that have at least 1 post (prevents empty category pages)
+    const filters = useMemo(() => {
+        const categoriesWithPosts = [...new Set(posts.map(post => post.category))].filter(Boolean);
+        return ['All', ...categoriesWithPosts.sort()];
+    }, [posts]);
 
     // Filter by category and search
     const filteredPosts = posts.filter(post => {
