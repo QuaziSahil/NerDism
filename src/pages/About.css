@@ -21,28 +21,114 @@
 }
 
 .about-content {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 80px;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
 }
 
-.mission-section h2 {
+.mission-section h2,
+.pillars-section h2,
+.standards-section h2,
+.author-section h2 {
     font-size: 2rem;
     margin-bottom: 24px;
     color: var(--accent-primary);
 }
 
-.mission-section p {
+.mission-section p,
+.pillars-section p,
+.standards-section p,
+.author-section p {
     font-size: 1.1rem;
     line-height: 1.8;
     color: var(--text-secondary);
     margin-bottom: 24px;
 }
 
-.stats-grid {
+/* Content Pillars Grid */
+.pillars-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.pillar-card {
+    background: var(--card-bg);
+    padding: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.pillar-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-primary);
+}
+
+.pillar-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.pillar-card p {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+/* Editorial Standards */
+.standards-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0 0;
+}
+
+.standards-list li {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding-left: 24px;
+    position: relative;
+}
+
+.standards-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+    font-weight: bold;
+}
+
+.standards-list li strong {
+    color: var(--text-primary);
+}
+
+/* Author Section */
+.author-card {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.author-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.author-title {
+    font-size: 1rem !important;
+    color: var(--accent-primary) !important;
+    margin-bottom: 20px !important;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px;
 }
 
@@ -79,8 +165,15 @@
         font-size: 3rem;
     }
 
-    .about-content {
+    .pillars-grid {
         grid-template-columns: 1fr;
-        gap: 48px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .author-card {
+        padding: 24px;
     }
 }

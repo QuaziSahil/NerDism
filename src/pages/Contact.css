@@ -20,7 +20,58 @@
     font-size: 1.1rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
+}
+
+/* New Content Sections */
+.contact-message-section,
+.response-info {
+    margin-bottom: 32px;
+}
+
+.contact-message-section h3,
+.response-info h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.contact-message-section p,
+.response-info p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.contact-types {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.contact-types li {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.contact-types li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+}
+
+.contact-types li strong {
+    color: var(--text-primary);
+}
+
+.response-info strong {
+    color: var(--accent-primary);
 }
 
 .contact-details {

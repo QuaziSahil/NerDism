@@ -64,9 +64,45 @@ const Contact = () => {
                     >
                         <h1>Get in <span className="gradient-text">Touch</span></h1>
                         <p className="contact-desc">
-                            Have a question, suggestion, or just want to geek out about something?
-                            Drop us a line.
+                            Have a question about a recent tech deep-dive? Want to suggest a game for us to review,
+                            or just want to geek out about the latest AI trends? We're always listening. At NerDism,
+                            we value community feedback and aim to build a space where curiosity is always rewarded.
                         </p>
+
+                        <div className="contact-message-section">
+                            <h3>How to Reach Us</h3>
+                            <p>
+                                While we have the contact form for your convenience, you can also reach out through
+                                the following official channels to ensure a direct response:
+                            </p>
+                            <ul className="contact-types">
+                                <li>
+                                    <strong>General Inquiries:</strong> For site feedback, questions about our articles,
+                                    or suggestions for topics you'd like us to cover.
+                                </li>
+                                <li>
+                                    <strong>Editorial & Tips:</strong> If you have a scoop on a new anime release,
+                                    tech breakthrough, or gaming news, please label your subject line as "Editorial Tip".
+                                </li>
+                                <li>
+                                    <strong>Collaborations:</strong> Interested in partnering with NerDism? We're
+                                    always looking for fellow creators in the tech, gaming, and anime space.
+                                </li>
+                                <li>
+                                    <strong>Bug Reports:</strong> Found a broken link or technical issue on our site?
+                                    Let us know and we'll fix it promptly.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div className="response-info">
+                            <h3>Response Time</h3>
+                            <p>
+                                We are a human-led team based in India. We strive to read every message we receive
+                                and typically respond within <strong>24–48 hours</strong> during business days. For
+                                urgent matters, reaching out via Twitter/X often gets a faster response.
+                            </p>
+                        </div>
 
                         <div className="contact-details">
                             {/* Email - Opens Gmail/Mail app */}
@@ -102,7 +138,7 @@ const Contact = () => {
 
                             <div className="detail-item">
                                 <MapPin className="icon" />
-                                <span>Internet, Earth</span>
+                                <span>India</span>
                             </div>
                         </div>
                     </motion.div>
