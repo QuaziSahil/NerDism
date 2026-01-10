@@ -22,10 +22,23 @@ const Blog = () => {
         fetchPosts();
     }, []);
 
-    // Only show categories that have at least 1 post (prevents empty category pages)
+    // Only show categories that have at least 3 posts (prevents thin category pages)
     const filters = useMemo(() => {
-        const categoriesWithPosts = [...new Set(posts.map(post => post.category))].filter(Boolean);
-        return ['All', ...categoriesWithPosts.sort()];
+        // Count posts per category
+        const categoryCounts = posts.reduce((acc, post) => {
+            if (post.category) {
+                acc[post.category] = (acc[post.category] || 0) + 1;
+            }
+            return acc;
+        }, {});
+
+        // Only include categories with 3+ posts
+        const categoriesWithEnoughPosts = Object.entries(categoryCounts)
+            .filter(([, count]) => count >= 3)
+            .map(([category]) => category)
+            .sort();
+
+        return ['All', ...categoriesWithEnoughPosts];
     }, [posts]);
 
     // Filter by category and search
